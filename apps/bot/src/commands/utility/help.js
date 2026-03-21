@@ -244,7 +244,8 @@ module.exports = {
         t("help.detailTitle", {
           command: `${context.config.prefix}${command.name}`
         }),
-        context.config.embedColor
+        context.config.embedColor,
+        { commandName: command.name }
       )
         .setDescription(getExplanation(command, context.language))
         .addFields(
@@ -287,7 +288,9 @@ module.exports = {
       return;
     }
 
-    const embed = createGameEmbed(t("help.title"), context.config.embedColor)
+    const embed = createGameEmbed(t("help.title"), context.config.embedColor, {
+      commandName: "help"
+    })
       .setDescription(
         t("help.summaryDescription", {
           usage: `${context.config.prefix}help <command>`

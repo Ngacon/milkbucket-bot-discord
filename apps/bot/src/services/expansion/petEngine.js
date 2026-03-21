@@ -53,38 +53,50 @@ const PET_PERSONALITIES = {
 const PET_ABILITIES = {
   fisher_frenzy: {
     label: "Fisher Frenzy",
+    labelVi: "Cuồng Câu Cá",
     domain: "fishing",
     description: "Boosts fish value, quality, and lucky ocean spikes.",
+    descriptionVi: "Tăng giá trị cá, chất lượng cá và các pha nổ vận may ngoài biển.",
     potency: 0.085
   },
   jackpot_nose: {
     label: "Jackpot Nose",
+    labelVi: "Mũi Ngửi Jackpot",
     domain: "gambling",
     description: "Adds gambling luck and stronger comeback bursts.",
+    descriptionVi: "Tăng vận đỏ khi cờ bạc và giúp lật kèo gắt hơn.",
     potency: 0.08
   },
   scavenger_rush: {
     label: "Scavenger Rush",
+    labelVi: "Cơn Lốc Nhặt Nhạnh",
     domain: "idle",
     description: "Finds more loot and stray keys while idling.",
+    descriptionVi: "Kiếm thêm loot và chìa khóa lạc trôi khi treo máy.",
     potency: 0.09
   },
   work_burst: {
     label: "Work Burst",
+    labelVi: "Bùng Nổ Cày Cuốc",
     domain: "work",
     description: "Boosts work payout and shift XP.",
+    descriptionVi: "Tăng tiền công và XP mỗi ca làm việc.",
     potency: 0.075
   },
   guardian_shell: {
     label: "Guardian Shell",
+    labelVi: "Mai Hộ Vệ",
     domain: "combat",
     description: "Adds defense, sustain, and duel stability.",
+    descriptionVi: "Tăng thủ, độ lì và độ ổn định khi solo.",
     potency: 0.1
   },
   chaos_engine: {
     label: "Chaos Engine",
+    labelVi: "Động Cơ Hỗn Loạn",
     domain: "general",
     description: "Small boost to everything with extra swing.",
+    descriptionVi: "Buff nhẹ mọi thứ kèm chút dao động hỗn loạn.",
     potency: 0.055
   }
 };

@@ -17,7 +17,9 @@ function createExpansionCommand({ name, aliases = [], description, cooldownMs = 
         return;
       }
 
-      const embed = createGameEmbed(result.title || `N${name}`, context.config.embedColor);
+      const embed = createGameEmbed(result.title || `N${name}`, context.config.embedColor, {
+        commandName: name
+      });
 
       if (result.description) {
         embed.setDescription(result.description);

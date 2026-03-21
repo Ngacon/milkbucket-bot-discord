@@ -35,12 +35,24 @@ function formatMoodLine(pet) {
   return `${getMoodEmoji(pet)} ${pet.mood}`;
 }
 
-function formatAbilities(pet) {
+function getSpeciesName(species, vi) {
+  return vi && species?.nameVi ? species.nameVi : species?.name;
+}
+
+function getAbilityLabel(ability, vi) {
+  return vi && ability?.labelVi ? ability.labelVi : ability?.label;
+}
+
+function getAbilityDescription(ability, vi) {
+  return vi && ability?.descriptionVi ? ability.descriptionVi : ability?.description;
+}
+
+function formatAbilities(pet, vi) {
   return getUnlockedAbilities(pet)
     .map((abilityKey) => {
       const ability = getAbilityProfile(abilityKey);
       const equipped = abilityKey === pet.equippedAbility ? " [EQUIPPED]" : "";
-      return `- ${ability.label}${equipped}`;
+      return `- ${getAbilityLabel(ability, vi)}${equipped}`;
     })
     .join("\n");
 }
@@ -89,7 +101,7 @@ function buildPetOverview(service, context, state) {
         {
           name: vi ? "Species Co San" : "Available Species",
           value: Object.entries(PET_SPECIES)
-            .map(([key, pet]) => `\`${key}\` -> ${pet.name} (${formatCoins(pet.cost)})`)
+            .map(([key, pet]) => `\`${key}\` -> ${getSpeciesName(pet, vi)} (${formatCoins(pet.cost)})`)
             .join("\n"),
           inline: false
         }
@@ -134,7 +146,7 @@ function buildPetOverview(service, context, state) {
       },
       {
         name: vi ? "Ability Dang Mac" : "Equipped Ability",
-        value: `${activeAbility.label}\n${activeAbility.description}`,
+        value: `${getAbilityLabel(activeAbility, vi)}\n${getAbilityDescription(activeAbility, vi)}`,
         inline: true
       },
       {
@@ -704,7 +716,7 @@ const petSystemMethods = {
           fields: [
             {
               name: vi ? "Danh Sach" : "Unlocked",
-              value: formatAbilities(pet),
+              value: formatAbilities(pet, vi),
               inline: false
             }
           ]
@@ -713,7 +725,11 @@ const petSystemMethods = {
 
       const matched = unlocked.find((abilityKey) => {
         const ability = getAbilityProfile(abilityKey);
-        return this.normalizeAnswer(abilityKey) === choice || this.normalizeAnswer(ability.label) === choice;
+        return (
+          this.normalizeAnswer(abilityKey) === choice ||
+          this.normalizeAnswer(ability.label) === choice ||
+          this.normalizeAnswer(ability.labelVi || "") === choice
+        );
       });
 
       if (!matched) {
@@ -728,12 +744,12 @@ const petSystemMethods = {
       return {
         title: vi ? "Da Trang Bi Ability" : "Ability Equipped",
         description: vi
-          ? `**${pet.nickname}** dang dung **${ability.label}**.`
-          : `**${pet.nickname}** is now using **${ability.label}**.`,
+          ? `**${pet.nickname}** dang dung **${getAbilityLabel(ability, vi)}**.`
+          : `**${pet.nickname}** is now using **${getAbilityLabel(ability, vi)}**.`,
         fields: [
           {
             name: vi ? "Mo Ta" : "Effect",
-            value: ability.description,
+            value: getAbilityDescription(ability, vi),
             inline: false
           }
         ]

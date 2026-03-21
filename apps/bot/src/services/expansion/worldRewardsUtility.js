@@ -26,6 +26,10 @@ function isVietnameseLanguage(language) {
   return String(language || "").toLowerCase().startsWith("vi");
 }
 
+function text(language, vi, en) {
+  return isVietnameseLanguage(language) ? vi : en;
+}
+
 function resolveConfigKey(rawKey) {
   for (const [settingKey, aliases] of Object.entries(CONFIG_KEY_ALIASES)) {
     if (aliases.has(rawKey)) {
@@ -185,6 +189,7 @@ const worldRewardsUtilityMethods = {
   async handleGuess(context) {
     return this.db.withTransaction(async (tx) => {
       const { actor, state } = await this.getActorBundle(context, tx, { forUpdate: true });
+      const language = this.resolveLanguage(context, state);
       const args = this.cleanArgs(context.args);
       const guess = args[0] ? Number(args[0]) : null;
       const pending = state.systems.minigames.pendingGuess;
@@ -200,11 +205,11 @@ const worldRewardsUtilityMethods = {
         await this.playerStateRepository.saveState(actor.id, state.systems, state.settings, tx);
 
         return {
-          title: "Guess Game",
-          description: `Guess a number between **1** and **${max}**.`,
+          title: text(language, "Đoán Số", "Guess Game"),
+          description: text(language, `Đoán một số từ **1** đến **${max}**.`, `Guess a number between **1** and **${max}**.`),
           fields: [
             {
-              name: "Submit With",
+              name: text(language, "Gửi Bằng", "Submit With"),
               value: "`Nguess <number>`",
               inline: false
             }
@@ -215,7 +220,7 @@ const worldRewardsUtilityMethods = {
       if (new Date(pending.expiresAt).getTime() < Date.now()) {
         state.systems.minigames.pendingGuess = null;
         await this.playerStateRepository.saveState(actor.id, state.systems, state.settings, tx);
-        throw new Error("That guess challenge expired. Run `Nguess` again.");
+        throw new Error(text(language, "Màn đoán số đó hết hạn rồi. Chạy `Nguess` lại đi.", "That guess challenge expired. Run `Nguess` again."));
       }
 
       state.systems.minigames.pendingGuess = null;
@@ -226,11 +231,11 @@ const worldRewardsUtilityMethods = {
         await this.playerStateRepository.saveState(actor.id, state.systems, state.settings, tx);
 
         return {
-          title: "Guess Correct",
-          description: `Bullseye. The hidden number was **${pending.target}**.`,
+          title: text(language, "Đoán Đúng", "Guess Correct"),
+          description: text(language, `Chuẩn luôn. Con số ẩn là **${pending.target}**.`, `Bullseye. The hidden number was **${pending.target}**.`),
           fields: [
             {
-              name: "Reward",
+              name: text(language, "Thưởng", "Reward"),
               value: formatCoins(reward),
               inline: true
             }
@@ -240,8 +245,8 @@ const worldRewardsUtilityMethods = {
 
       await this.playerStateRepository.saveState(actor.id, state.systems, state.settings, tx);
       return {
-        title: "Guess Wrong",
-        description: `Nope. The number was **${pending.target}**.`,
+        title: text(language, "Đoán Sai", "Guess Wrong"),
+        description: text(language, `Sai rồi. Con số là **${pending.target}**.`, `Nope. The number was **${pending.target}**.`),
         fields: []
       };
     });
@@ -262,6 +267,7 @@ const worldRewardsUtilityMethods = {
         const stateMap = new Map(states.map((entry) => [Number(entry.user_id), entry]));
         const actorState = stateMap.get(Number(actor.id));
         const targetState = stateMap.get(Number(targetUser.id));
+        const language = this.resolveLanguage(context, actorState);
 
         const actorPower =
           Number(actorSummary.level) * 3 +
@@ -282,16 +288,20 @@ const worldRewardsUtilityMethods = {
           await this.playerStateRepository.saveState(actor.id, actorState.systems, actorState.settings, tx);
 
           return {
-            title: "PvP Battle",
-            description: `You defeated **${targetDiscordUser.username}** in a loud, unnecessary, glorious showdown.`,
+            title: text(language, "Đấu PvP", "PvP Battle"),
+            description: text(
+              language,
+              `Bạn hạ gục **${targetDiscordUser.username}** trong một trận chiến ồn ào, thừa thãi nhưng rất huy hoàng.`,
+              `You defeated **${targetDiscordUser.username}** in a loud, unnecessary, glorious showdown.`
+            ),
             fields: [
               {
-                name: "Power",
+                name: text(language, "Sức Mạnh", "Power"),
                 value: `${actorPower} vs ${targetPower}`,
                 inline: true
               },
               {
-                name: "Reward",
+                name: text(language, "Thưởng", "Reward"),
                 value: formatCoins(reward),
                 inline: true
               }
@@ -300,11 +310,15 @@ const worldRewardsUtilityMethods = {
         }
 
         return {
-          title: "PvP Battle",
-          description: `**${targetDiscordUser.username}** won the clash. You have been respectfully ratioed.`,
+          title: text(language, "Đấu PvP", "PvP Battle"),
+          description: text(
+            language,
+            `**${targetDiscordUser.username}** thắng trận này. Bạn vừa bị ratio một cách rất lịch sự.`,
+            `**${targetDiscordUser.username}** won the clash. You have been respectfully ratioed.`
+          ),
           fields: [
             {
-              name: "Power",
+              name: text(language, "Sức Mạnh", "Power"),
               value: `${actorPower} vs ${targetPower}`,
               inline: true
             }
@@ -313,7 +327,9 @@ const worldRewardsUtilityMethods = {
       }
 
       const { actor, summary, state } = await this.getActorBundle(context, tx, { forUpdate: true });
+      const language = this.resolveLanguage(context, state);
       const zone = ZONES[state.systems.world.zone];
+      const zoneLabel = this.getLocalizedZoneLabel(zone, language);
       const actorPower =
         Number(summary.level) * 3 +
         Math.floor(this.getPetBattleRating(state) * 0.5) +
@@ -329,16 +345,20 @@ const worldRewardsUtilityMethods = {
         await this.playerStateRepository.saveState(actor.id, state.systems, state.settings, tx);
 
         return {
-          title: "Arena Battle",
-          description: `You flattened a local menace in **${zone.label}** and looted the applause.`,
+          title: text(language, "Đấu Trường", "Arena Battle"),
+          description: text(
+            language,
+            `Bạn đè bẹp mối họa địa phương ở **${zoneLabel}** rồi tiện tay hốt luôn cả tràng pháo tay.`,
+            `You flattened a local menace in **${zoneLabel}** and looted the applause.`
+          ),
           fields: [
             {
-              name: "Power",
+              name: text(language, "Sức Mạnh", "Power"),
               value: `${actorPower} vs ${enemyPower}`,
               inline: true
             },
             {
-              name: "Reward",
+              name: text(language, "Thưởng", "Reward"),
               value: formatCoins(reward),
               inline: true
             }
@@ -347,11 +367,15 @@ const worldRewardsUtilityMethods = {
       }
 
       return {
-        title: "Arena Battle",
-        description: `The local menace in **${zone.label}** punched back. Very rude.`,
+        title: text(language, "Đấu Trường", "Arena Battle"),
+        description: text(
+          language,
+          `Mối họa địa phương ở **${zoneLabel}** đấm trả rất lực. Hơi vô duyên.`,
+          `The local menace in **${zoneLabel}** punched back. Very rude.`
+        ),
         fields: [
           {
-            name: "Power",
+            name: text(language, "Sức Mạnh", "Power"),
             value: `${actorPower} vs ${enemyPower}`,
             inline: true
           }
@@ -363,16 +387,17 @@ const worldRewardsUtilityMethods = {
   async handleTravel(context) {
     return this.db.withTransaction(async (tx) => {
       const { actor, summary, state } = await this.getActorBundle(context, tx, { forUpdate: true });
+      const language = this.resolveLanguage(context, state);
       const args = this.cleanArgs(context.args);
       const zoneKey = this.normalizeAnswer(args[0] || "");
 
       if (!zoneKey) {
         return {
-          title: "Travel Routes",
+          title: text(language, "Tuyến Di Chuyển", "Travel Routes"),
           description: Object.entries(ZONES)
             .map(
               ([key, zone]) =>
-                `**${key}** -> ${zone.label} | unlock Lv.${zone.unlockLevel} | fare ${formatCoins(zone.fare)}`
+                `**${key}** -> ${this.getLocalizedZoneLabel(zone, language)} | ${text(language, "mở ở", "unlock")} Lv.${zone.unlockLevel} | ${text(language, "phí", "fare")} ${formatCoins(zone.fare)}`
             )
             .join("\n"),
           fields: []
@@ -380,11 +405,13 @@ const worldRewardsUtilityMethods = {
       }
 
       const zone = ZONES[zoneKey];
-      if (!zone) throw new Error(`Unknown zone. Options: ${Object.keys(ZONES).join(", ")}`);
+      const zoneLabel = this.getLocalizedZoneLabel(zone, language);
+      const zoneDescription = this.getLocalizedZoneDescription(zone, language);
+      if (!zone) throw new Error(text(language, `Khu vực không hợp lệ. Chọn một trong: ${Object.keys(ZONES).join(", ")}`, `Unknown zone. Options: ${Object.keys(ZONES).join(", ")}`));
       if (Number(summary.level) < zone.unlockLevel) {
-        throw new Error(`You need to be level ${zone.unlockLevel} to reach ${zone.label}.`);
+        throw new Error(text(language, `Bạn cần cấp ${zone.unlockLevel} để tới ${zoneLabel}.`, `You need to be level ${zone.unlockLevel} to reach ${zoneLabel}.`));
       }
-      if (Number(summary.wallet) < zone.fare) throw new Error(`Travel fare is ${formatCoins(zone.fare)}.`);
+      if (Number(summary.wallet) < zone.fare) throw new Error(text(language, `Phí di chuyển là ${formatCoins(zone.fare)}.`, `Travel fare is ${formatCoins(zone.fare)}.`));
 
       if (zone.fare > 0) {
         await this.economyRepository.mutateWallet(actor.id, -zone.fare, "travel_fare", tx);
@@ -400,21 +427,21 @@ const worldRewardsUtilityMethods = {
       await this.playerStateRepository.saveState(actor.id, state.systems, state.settings, tx);
 
       return {
-        title: "Travel Complete",
-        description: `You traveled to **${zone.label}**. ${zone.description}`,
+        title: text(language, "Di Chuyển Thành Công", "Travel Complete"),
+        description: text(language, `Bạn đã tới **${zoneLabel}**. ${zoneDescription}`, `You traveled to **${zoneLabel}**. ${zoneDescription}`),
         fields: [
           {
-            name: "Fare",
+            name: text(language, "Phí", "Fare"),
             value: formatCoins(zone.fare),
             inline: true
           },
           {
-            name: "Danger",
+            name: text(language, "Nguy Hiểm", "Danger"),
             value: `${zone.danger}/5`,
             inline: true
           },
           {
-            name: "Trips",
+            name: text(language, "Số Chuyến", "Trips"),
             value: `${state.systems.world.travelCount}`,
             inline: true
           }
@@ -426,20 +453,25 @@ const worldRewardsUtilityMethods = {
   async handleMap(context) {
     return this.db.withTransaction(async (tx) => {
       const { state } = await this.getActorBundle(context, tx);
+      const language = this.resolveLanguage(context, state);
       const discovered = new Set(state.systems.world.discovered);
 
       return {
-        title: "World Map",
+        title: text(language, "Bản Đồ Thế Giới", "World Map"),
         description: Object.entries(ZONES)
           .map(([key, zone]) => {
-            const marker = key === state.systems.world.zone ? "[YOU]" : discovered.has(key) ? "[OPEN]" : "[FOG]";
-            return `${marker} **${zone.label}** (\`${key}\`)`;
+            const marker = key === state.systems.world.zone
+              ? text(language, "[BẠN]", "[YOU]")
+              : discovered.has(key)
+                ? text(language, "[MỞ]", "[OPEN]")
+                : text(language, "[MỜ]", "[FOG]");
+            return `${marker} **${this.getLocalizedZoneLabel(zone, language)}** (\`${key}\`)`;
           })
           .join("\n"),
         fields: [
           {
-            name: "Current Zone",
-            value: ZONES[state.systems.world.zone].label,
+            name: text(language, "Khu Vực Hiện Tại", "Current Zone"),
+            value: this.getLocalizedZoneLabel(ZONES[state.systems.world.zone], language),
             inline: true
           }
         ]
@@ -450,29 +482,32 @@ const worldRewardsUtilityMethods = {
   async handleZone(context) {
     return this.db.withTransaction(async (tx) => {
       const { state } = await this.getActorBundle(context, tx);
+      const language = this.resolveLanguage(context, state);
       const zone = ZONES[state.systems.world.zone];
+      const zoneLabel = this.getLocalizedZoneLabel(zone, language);
+      const zoneDescription = this.getLocalizedZoneDescription(zone, language);
 
       return {
-        title: "Zone Intel",
-        description: zone.description,
+        title: text(language, "Thông Tin Khu Vực", "Zone Intel"),
+        description: zoneDescription,
         fields: [
           {
-            name: "Zone",
-            value: zone.label,
+            name: text(language, "Khu Vực", "Zone"),
+            value: zoneLabel,
             inline: true
           },
           {
-            name: "Danger",
+            name: text(language, "Nguy Hiểm", "Danger"),
             value: `${zone.danger}/5`,
             inline: true
           },
           {
-            name: "Reward Range",
+            name: text(language, "Khoảng Thưởng", "Reward Range"),
             value: `${formatCoins(zone.rewardRange[0])} - ${formatCoins(zone.rewardRange[1])}`,
             inline: true
           },
           {
-            name: "Chest Chance",
+            name: text(language, "Tỉ Lệ Rương", "Chest Chance"),
             value: this.formatPercent(zone.chestChance),
             inline: true
           }
@@ -484,8 +519,11 @@ const worldRewardsUtilityMethods = {
   async handleDungeon(context) {
     return this.db.withTransaction(async (tx) => {
       const { actor, summary, state } = await this.getActorBundle(context, tx, { forUpdate: true });
-      this.assertNotJailed(state);
+      const language = this.resolveLanguage(context, state);
+      const t = this.getTranslator({ ...context, language });
+      this.assertNotJailed(state, t);
       const zone = ZONES[state.systems.world.zone];
+      const zoneLabel = this.getLocalizedZoneLabel(zone, language);
       const successChance = this.clamp(
         0.7 - zone.danger * 0.08 + Number(summary.level) * 0.02 + this.getPetPassiveBonus(state, "combat"),
         0.2,
@@ -505,11 +543,15 @@ const worldRewardsUtilityMethods = {
         await this.playerStateRepository.saveState(actor.id, state.systems, state.settings, tx);
 
         return {
-          title: "Dungeon Clear",
-          description: `You cleared a dungeon in **${zone.label}** and emerged with pockets full of nonsense.`,
+          title: text(language, "Phá Đảo Dungeon", "Dungeon Clear"),
+          description: text(
+            language,
+            `Bạn quét sạch dungeon ở **${zoneLabel}** rồi chui ra với túi đầy đồ vô lý.`,
+            `You cleared a dungeon in **${zoneLabel}** and emerged with pockets full of nonsense.`
+          ),
           fields: [
             {
-              name: "Reward",
+              name: text(language, "Thưởng", "Reward"),
               value: formatCoins(reward),
               inline: true
             },
@@ -519,8 +561,10 @@ const worldRewardsUtilityMethods = {
               inline: true
             },
             {
-              name: "Key Drop",
-              value: keyDrop ? "1 key found" : "No key this run",
+              name: text(language, "Rơi Chìa", "Key Drop"),
+              value: keyDrop
+                ? text(language, "Tìm thấy 1 chìa", "1 key found")
+                : text(language, "Lượt này không có chìa", "No key this run"),
               inline: true
             }
           ]
@@ -533,16 +577,20 @@ const worldRewardsUtilityMethods = {
       }
 
       return {
-        title: "Dungeon Wipe",
-        description: `You got bounced out of the dungeon in **${zone.label}**. The walls won this round.`,
+        title: text(language, "Toang Dungeon", "Dungeon Wipe"),
+        description: text(
+          language,
+          `Bạn bị đá văng khỏi dungeon ở **${zoneLabel}**. Tường thắng ván này.`,
+          `You got bounced out of the dungeon in **${zoneLabel}**. The walls won this round.`
+        ),
         fields: [
           {
-            name: "Loss",
+            name: text(language, "Mất", "Loss"),
             value: formatCoins(loss),
             inline: true
           },
           {
-            name: "Success Chance",
+            name: text(language, "Tỉ Lệ Thành Công", "Success Chance"),
             value: this.formatPercent(successChance),
             inline: true
           }
@@ -553,10 +601,12 @@ const worldRewardsUtilityMethods = {
 
   async handleGift(context) {
     return this.db.withTransaction(async (tx) => {
+      const language = this.resolveLanguage(context);
+      const t = this.getTranslator({ ...context, language });
       const targetDiscordUser = this.getMentionedUser(context.message);
-      if (!targetDiscordUser) throw new Error("Tag someone to gift.");
+      if (!targetDiscordUser) throw new Error(text(language, "Tag ai đó để tặng quà.", "Tag someone to gift."));
       if (targetDiscordUser.id === context.message.author.id) {
-        throw new Error("Gift someone else. Self-gifting is just inventory cosplay.");
+        throw new Error(text(language, "Tặng người khác đi. Tự tặng mình chỉ là cosplay kho đồ.", "Gift someone else. Self-gifting is just inventory cosplay."));
       }
 
       const actor = await this.getActorUser(context, tx);
@@ -569,10 +619,10 @@ const worldRewardsUtilityMethods = {
       const actorState = stateMap.get(Number(actor.id));
       const targetState = stateMap.get(Number(targetUser.id));
       const args = this.cleanArgs(context.args);
-      const amount = this.parseAmount(args[1], 200, Number(actorSummary.wallet));
+      const amount = this.parseAmount(args[1], 200, Number(actorSummary.wallet), t);
 
-      if (amount <= 0) throw new Error("Gift at least 1 coin.");
-      if (Number(actorSummary.wallet) < amount) throw new Error(`You need ${formatCoins(amount)} in your wallet.`);
+      if (amount <= 0) throw new Error(text(language, "Tặng ít nhất 1 coin.", "Gift at least 1 coin."));
+      if (Number(actorSummary.wallet) < amount) throw new Error(text(language, `Bạn cần ${formatCoins(amount)} trong ví.`, `You need ${formatCoins(amount)} in your wallet.`));
 
       await this.economyRepository.mutateWallet(actor.id, -amount, "gift_sent", tx);
       await this.economyRepository.mutateWallet(targetUser.id, amount, "gift_received", tx);
@@ -584,16 +634,16 @@ const worldRewardsUtilityMethods = {
       await this.playerStateRepository.saveState(targetUser.id, targetState.systems, targetState.settings, tx);
 
       return {
-        title: "Gift Sent",
-        description: `You sent ${formatCoins(amount)} to **${targetDiscordUser.username}**.`,
+        title: text(language, "Đã Gửi Quà", "Gift Sent"),
+        description: text(language, `Bạn đã gửi ${formatCoins(amount)} cho **${targetDiscordUser.username}**.`, `You sent ${formatCoins(amount)} to **${targetDiscordUser.username}**.`),
         fields: [
           {
-            name: "Gifts Sent",
+            name: text(language, "Quà Đã Tặng", "Gifts Sent"),
             value: `${actorState.systems.social.giftsSent}`,
             inline: true
           },
           {
-            name: "Lifetime Gifted",
+            name: text(language, "Tổng Đã Tặng", "Lifetime Gifted"),
             value: formatCoins(actorState.systems.rewards.giftedCoins),
             inline: true
           }
@@ -605,12 +655,13 @@ const worldRewardsUtilityMethods = {
   async handleRedeem(context) {
     return this.db.withTransaction(async (tx) => {
       const { actor, state } = await this.getActorBundle(context, tx, { forUpdate: true });
+      const language = this.resolveLanguage(context, state);
       const args = this.cleanArgs(context.args);
       const code = String(args[0] || "").toUpperCase();
       const reward = REDEEM_CODES[code];
 
-      if (!reward) throw new Error("Unknown redeem code.");
-      if (state.systems.rewards.redeemedCodes.includes(code)) throw new Error("You already redeemed that code.");
+      if (!reward) throw new Error(text(language, "Code đổi quà không tồn tại.", "Unknown redeem code."));
+      if (state.systems.rewards.redeemedCodes.includes(code)) throw new Error(text(language, "Bạn đã đổi code đó rồi.", "You already redeemed that code."));
 
       state.systems.rewards.redeemedCodes.push(code);
       state.systems.rewards.keys += reward.keys || 0;
@@ -622,21 +673,21 @@ const worldRewardsUtilityMethods = {
       await this.playerStateRepository.saveState(actor.id, state.systems, state.settings, tx);
 
       return {
-        title: "Code Redeemed",
-        description: `Redeemed **${code}**. ${reward.description}`,
+        title: text(language, "Đổi Code Thành Công", "Code Redeemed"),
+        description: text(language, `Đã đổi **${code}**. ${this.getLocalizedRewardDescription(reward, language)}`, `Redeemed **${code}**. ${this.getLocalizedRewardDescription(reward, language)}`),
         fields: [
           {
-            name: "Coins",
+            name: text(language, "Coins", "Coins"),
             value: formatCoins(reward.coins || 0),
             inline: true
           },
           {
-            name: "XP",
-            value: `${reward.xp || 0}`,
-            inline: true
+              name: "XP",
+              value: `${reward.xp || 0}`,
+              inline: true
           },
           {
-            name: "Keys",
+            name: text(language, "Chìa", "Keys"),
             value: `${reward.keys || 0}`,
             inline: true
           }
@@ -648,8 +699,9 @@ const worldRewardsUtilityMethods = {
   async handleChest(context) {
     return this.db.withTransaction(async (tx) => {
       const { actor, state } = await this.getActorBundle(context, tx, { forUpdate: true });
+      const language = this.resolveLanguage(context, state);
       if (state.systems.rewards.keys <= 0) {
-        throw new Error("You have no chest keys. Farm some with lottery, dungeon, or work luck.");
+        throw new Error(text(language, "Bạn không có chìa rương nào. Kiếm thêm từ lottery, dungeon hoặc luck khi làm việc đi.", "You have no chest keys. Farm some with lottery, dungeon, or work luck."));
       }
 
       state.systems.rewards.keys -= 1;
@@ -665,11 +717,11 @@ const worldRewardsUtilityMethods = {
       await this.playerStateRepository.saveState(actor.id, state.systems, state.settings, tx);
 
       return {
-        title: "Chest Opened",
-        description: "The chest exploded into coins, XP, and one suspicious loot box.",
+        title: text(language, "Mở Rương", "Chest Opened"),
+        description: text(language, "Chiếc rương nổ tung thành coin, XP và một loot box rất đáng nghi.", "The chest exploded into coins, XP, and one suspicious loot box."),
         fields: [
           {
-            name: "Coins",
+            name: text(language, "Coins", "Coins"),
             value: formatCoins(coinReward),
             inline: true
           },
@@ -679,7 +731,7 @@ const worldRewardsUtilityMethods = {
             inline: true
           },
           {
-            name: "Loot Box",
+            name: text(language, "Hộp Loot", "Loot Box"),
             value: crateKey,
             inline: true
           }
@@ -788,8 +840,9 @@ const worldRewardsUtilityMethods = {
     return this.db.withTransaction(async (tx) => {
       const args = this.cleanArgs(context.args);
       const subcommand = this.normalizeAnswer(args[0] || "view");
+      const baseLanguage = this.resolveLanguage(context);
       if (subcommand !== "view" && args.length) {
-        throw new Error("Use `Nprofile view @user` or just `Nprofile`.");
+        throw new Error(text(baseLanguage, "Dùng `Nprofile view @user` hoặc chỉ `Nprofile`.", "Use `Nprofile view @user` or just `Nprofile`."));
       }
 
       const targetDiscordUser = this.getMentionedUser(context.message) || context.message.author;
@@ -797,6 +850,7 @@ const worldRewardsUtilityMethods = {
         targetDiscordUser.id === context.message.author.id
           ? await this.getActorBundle(context, tx)
           : await this.getTargetBundle(targetDiscordUser, tx);
+      const language = this.resolveLanguage(context, bundle.state);
       const partnerUserId = bundle.state.systems.social.partnerUserId;
       const users = await this.userRepository.getUsersByIds([partnerUserId].filter(Boolean), tx);
       const usersById = new Map(users.map((user) => [Number(user.id), user]));
@@ -804,55 +858,60 @@ const worldRewardsUtilityMethods = {
       const activePet = this.getActivePetRecord(bundle.state);
       const house = bundle.state.systems.housing;
       const zone = ZONES[bundle.state.systems.world.zone];
+      const zoneLabel = this.getLocalizedZoneLabel(zone, language);
+      const petName = pet ? this.getLocalizedPetName(pet, language) : null;
+      const houseLabel = house.owned ? this.getLocalizedHouseLabel(HOUSE_STYLES[house.style], language) : null;
 
       return {
-        title: `${targetDiscordUser.username}'s Profile`,
-        description: "Live-service progress snapshot.",
+        title: text(language, `Hồ Sơ Của ${targetDiscordUser.username}`, `${targetDiscordUser.username}'s Profile`),
+        description: text(language, "Ảnh chụp tiến độ live-service hiện tại.", "Live-service progress snapshot."),
         fields: [
           {
-            name: "Wallet / Bank",
+            name: text(language, "Ví / Ngân Hàng", "Wallet / Bank"),
             value: `${formatCoins(bundle.summary.wallet)} / ${formatCoins(bundle.summary.bank)}`,
             inline: true
           },
           {
-            name: "Level",
+            name: text(language, "Cấp Độ", "Level"),
             value: `Lv.${bundle.summary.level} | XP ${bundle.summary.xp}`,
             inline: true
           },
           {
-            name: "Zone",
-            value: zone.label,
+            name: text(language, "Khu Vực", "Zone"),
+            value: zoneLabel,
             inline: true
           },
           {
-            name: "Pet",
+            name: text(language, "Thú Cưng", "Pet"),
             value: pet && activePet
-              ? `${activePet.nickname} | Lv.${activePet.level} | stage ${bundle.state.systems.pet.stage}`
-              : "None",
+              ? text(language, `${activePet.nickname} | Lv.${activePet.level} | giai đoạn ${bundle.state.systems.pet.stage} | ${petName}`, `${activePet.nickname} | Lv.${activePet.level} | stage ${bundle.state.systems.pet.stage}`)
+              : text(language, "Chưa có", "None"),
             inline: true
           },
           {
-            name: "House",
-            value: house.owned ? `${HOUSE_STYLES[house.style].label} T${house.tier}` : "None",
+            name: text(language, "Nhà Ở", "House"),
+            value: house.owned ? `${houseLabel} T${house.tier}` : text(language, "Chưa có", "None"),
             inline: true
           },
           {
-            name: "Island",
-            value: bundle.state.systems.island.owned ? `Tier ${bundle.state.systems.island.tier}` : "None",
+            name: text(language, "Đảo", "Island"),
+            value: bundle.state.systems.island.owned
+              ? text(language, `Bậc ${bundle.state.systems.island.tier}`, `Tier ${bundle.state.systems.island.tier}`)
+              : text(language, "Chưa có", "None"),
             inline: true
           },
           {
-            name: "Partner",
-            value: this.getPartnerLabel(usersById, partnerUserId),
+            name: text(language, "Bạn Đời", "Partner"),
+            value: this.getPartnerLabel(usersById, partnerUserId, language),
             inline: true
           },
           {
-            name: "Market Goods",
+            name: text(language, "Hàng Chợ", "Market Goods"),
             value: `${bundle.state.systems.market.ownedGoods.length}`,
             inline: true
           },
           {
-            name: "Crime Heat / Bounty",
+            name: text(language, "Nóng / Tiền Truy Nã", "Crime Heat / Bounty"),
             value: `${bundle.state.systems.crime.heat} / ${formatCoins(bundle.state.systems.crime.bounty)}`,
             inline: true
           }

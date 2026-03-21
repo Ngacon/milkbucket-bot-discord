@@ -76,7 +76,8 @@ module.exports = {
       t("wallet.title", {
         user: targetUser.username
       }),
-      context.config.embedColor
+      context.config.embedColor,
+      { commandName: "wallet" }
     )
       .setDescription(`${t("wallet.description")}\n${walletFlavor}`)
       .addFields(

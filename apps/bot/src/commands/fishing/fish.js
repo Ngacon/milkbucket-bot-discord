@@ -12,7 +12,8 @@ function wait(ms) {
 function buildMapInfoEmbed(context, locale, payload) {
   const embed = createGameEmbed(
     locale === "vi" ? "Thông Tin Bản Đồ Câu Cá" : "Fishing Map Intel",
-    context.config.embedColor
+    context.config.embedColor,
+    { commandName: "fish" }
   );
 
   embed
@@ -61,7 +62,8 @@ function buildMapInfoEmbed(context, locale, payload) {
 function buildCollectionEmbed(context, locale, payload) {
   const embed = createGameEmbed(
     locale === "vi" ? "Bộ Sưu Tập Cá" : "Fish Collection",
-    context.config.embedColor
+    context.config.embedColor,
+    { commandName: "fish" }
   );
 
   embed
@@ -97,7 +99,8 @@ function buildCollectionEmbed(context, locale, payload) {
 function buildLeaderboardEmbed(context, locale, payload) {
   const embed = createGameEmbed(
     locale === "vi" ? "Bảng Xếp Hạng Câu Cá" : "Fishing Leaderboard",
-    context.config.embedColor
+    context.config.embedColor,
+    { commandName: "fish" }
   );
 
   const titleSuffix = payload.mapKey
@@ -163,7 +166,8 @@ module.exports = {
     const fishService = context.services.fishingService;
     const sharedOptions = {
       user: context.user,
-      skipBootstrap: Boolean(context.user)
+      skipBootstrap: Boolean(context.user),
+      language: context.language
     };
 
     if (subcommand === "info") {
@@ -186,7 +190,8 @@ module.exports = {
 
     if (subcommand === "leaderboard" || subcommand === "lb" || subcommand === "top") {
       const payload = await fishService.getLeaderboard({
-        mapKey: context.args[1] || null
+        mapKey: context.args[1] || null,
+        language: context.language
       });
       await context.message.reply({ embeds: [buildLeaderboardEmbed(context, locale, payload)] });
       return;
@@ -200,7 +205,8 @@ module.exports = {
 
     const embed = createGameEmbed(
       locale === "vi" ? "Kết Quả Câu Cá" : "Fishing Result",
-      context.config.embedColor
+      context.config.embedColor,
+      { commandName: "fish" }
     )
       .setDescription(
         [

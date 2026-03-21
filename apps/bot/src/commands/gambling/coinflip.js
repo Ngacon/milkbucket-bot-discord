@@ -93,11 +93,14 @@ module.exports = {
       rawBet,
       {
         user: context.user,
-        skipBootstrap: Boolean(context.user)
+        skipBootstrap: Boolean(context.user),
+        language: context.language
       }
     );
 
-    const embed = createGameEmbed(t("coinflip.title"), context.config.embedColor)
+    const embed = createGameEmbed(t("coinflip.title"), context.config.embedColor, {
+      commandName: "coinflip"
+    })
       .setDescription(
         `${t("coinflip.description", {
           choice,

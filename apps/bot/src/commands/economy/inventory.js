@@ -73,7 +73,9 @@ module.exports = {
       return `${item.emoji || rarityEmoji(item.rarity)} **${item.name}** x${item.quantity}${equipped}${durability}`;
     });
 
-    const embed = createGameEmbed(t("inventory.title"), context.config.embedColor)
+    const embed = createGameEmbed(t("inventory.title"), context.config.embedColor, {
+      commandName: "inventory"
+    })
       .setDescription(
         lines.length ? `**${mood}**\n\n${lines.join("\n")}` : `${t("inventory.empty")}\n${mood}`
       )

@@ -102,7 +102,8 @@ services.randomEventService = new RandomEventService({
   chaosChance: config.chaosEventChance,
   ambientChance: config.ambientEventChance,
   profileService: services.profileService,
-  economyRepository: repositories.economyRepository
+  economyRepository: repositories.economyRepository,
+  playerStateRepository: repositories.playerStateRepository
 });
 
 async function start() {

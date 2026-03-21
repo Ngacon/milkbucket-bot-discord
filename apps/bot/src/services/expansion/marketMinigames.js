@@ -1,19 +1,171 @@
 const { QUIZ_BANK, FASTTYPE_PHRASES, MARKET_TEMPLATES } = require("../../data/liveGameData");
-const { ZONES, formatCoins } = require("./shared");
+const { formatCoins } = require("./shared");
+
+function isVietnameseLanguage(language) {
+  return String(language || "").toLowerCase().startsWith("vi");
+}
+
+function getQuizPrompt(quiz, language) {
+  return isVietnameseLanguage(language) ? quiz.promptVi || quiz.prompt : quiz.prompt;
+}
+
+function getQuizHint(quiz, language) {
+  return isVietnameseLanguage(language) ? quiz.hintVi || quiz.hint : quiz.hint;
+}
+
+function getMarketCopy(language) {
+  if (isVietnameseLanguage(language)) {
+    return {
+      marketTitle: "Chợ Người Chơi",
+      marketDescription:
+        "Không khí bazaar live-service. Bên trái là listing, bên phải là auction đang chạy, hi vọng scam ở mức tối thiểu.",
+      listings: "Danh Sách Rao",
+      noListings: "Chưa có listing nào. Dùng `Nsell player <item> <price>`.",
+      auctions: "Phiên Đấu Giá",
+      nobody: "chưa ai",
+      noAuctions: "Chưa có đấu giá nào. Dùng `Nauction start <item> <startBid>`.",
+      autoSettled: "Tự Chốt",
+      soldExpired: (sold, expired) => `${sold} bán xong / ${expired} hết hạn`,
+      sellUsage: "Hiện tại chợ người chơi dùng `Nsell player <tên món> <giá>`.",
+      validPrice: "Kết thúc câu lệnh bằng một mức giá hợp lệ đi.",
+      listingCreated: "Đã Tạo Listing",
+      listingDescription: (title) => `Bạn đã đăng **${title}** lên chợ người chơi.`,
+      listingId: "Mã Listing",
+      price: "Giá",
+      buyUsage: "Dùng `Nbuy player <listingId>` để mua trên chợ.",
+      listingGone: "Listing đó biến mất rồi.",
+      buyOwnListing: "Tự mua listing của mình là một dạng hoang mang nâng cao.",
+      needToBuy: (price) => `Bạn cần ${formatCoins(price)} để mua món đó.`,
+      marketPurchase: "Mua Chợ Thành Công",
+      purchaseDescription: (title, price) => `Bạn đã mua **${title}** với giá ${formatCoins(price)}.`,
+      buyerGoods: "Kho Đồ Người Mua",
+      storedGoods: (count) => `${count} món đang giữ`,
+      sellerId: "ID Người Bán",
+      auctionStartPositive: "Giá mở phiên phải là số dương hợp lệ.",
+      auctionStarted: "Đã Mở Đấu Giá",
+      auctionStartedDescription: (title) => `Bạn đã mở đấu giá cho **${title}**.`,
+      auctionId: "Mã Đấu Giá",
+      startingBid: "Giá Khởi Điểm",
+      settledEarlier: "Đã Chốt Trước Đó",
+      auctionInactive: "Phiên đấu giá đó không còn hoạt động.",
+      ownAuctionBid: "Bạn không thể tự bid đấu giá của mình.",
+      alreadyTopBid: "Bạn đang là top bid rồi. Để người khác còn có dịp hoảng.",
+      minimumBid: (amount) => `Mức bid tối thiểu hợp lệ là ${formatCoins(amount)}.`,
+      needWalletBid: (amount) => `Bạn cần ${formatCoins(amount)} trong ví.`,
+      bidPlaced: "Đã Đặt Giá",
+      bidPlacedDescription: (amount, title) =>
+        `Bạn ném ${formatCoins(amount)} vào **${title}** và thách cả server vượt mặt.`,
+      previousBid: "Giá Trước Đó",
+      auctionBoard: "Bảng Đấu Giá",
+      auctionBoardDescription: "Dùng `Nauction start <item> <startBid>` hoặc `Nauction bid <id> <amount>`.",
+      activeAuctions: "Đấu Giá Đang Chạy",
+      noActiveAuctions: "Chưa có đấu giá nào đang chạy.",
+      justSettled: "Vừa Chốt",
+      quizTime: "Đố Vui",
+      hint: "Gợi Ý",
+      answerWith: "Trả Lời Bằng",
+      quizExpired: "Câu đố đó hết hạn rồi. Chạy `Nquiz` lại để lấy câu mới.",
+      quizSolved: "Giải Đúng",
+      quizSolvedDescription: "Chuẩn rồi. Con goblin đố vui đã tạm thời bị bịt miệng.",
+      reward: "Thưởng",
+      streak: "Chuỗi",
+      quizMissed: "Trả Lời Sai",
+      quizMissedDescription: (answer) => `Sai rồi. Đáp án đúng là **${answer}**.`,
+      streakReset: "Reset về 0",
+      fastType: "Gõ Nhanh",
+      fastTypeDescription: (phrase) => `Gõ y nguyên câu này: **${phrase}**`,
+      submitWith: "Gửi Bằng",
+      fastTypeExpired: "Màn gõ nhanh đó hết hạn rồi. Chạy `Nfasttype` lại đi.",
+      fastTypeClear: "Gõ Chuẩn",
+      fastTypeClearDescription: "Chuẩn từng ký tự. Ngón tay bạn chính thức được tài trợ bởi sự hoảng loạn.",
+      fastTypeMiss: "Gõ Trượt",
+      fastTypeMissDescription: (phrase) => `Suýt đúng, nhưng cụm chính xác là **${phrase}**.`
+    };
+  }
+
+  return {
+    marketTitle: "Player Market",
+    marketDescription:
+      "Live-service bazaar energy. Listings on the left, active auctions on the right, scams hopefully minimal.",
+    listings: "Listings",
+    noListings: "No listings yet. Use `Nsell player <item> <price>`.",
+    auctions: "Auctions",
+    nobody: "nobody",
+    noAuctions: "No active auctions. Use `Nauction start <item> <startBid>`.",
+    autoSettled: "Auto Settled",
+    soldExpired: (sold, expired) => `${sold} sold / ${expired} expired`,
+    sellUsage: "Right now the player market uses `Nsell player <item name> <price>`.",
+    validPrice: "End your command with a valid price.",
+    listingCreated: "Listing Created",
+    listingDescription: (title) => `You listed **${title}** on the player market.`,
+    listingId: "Listing ID",
+    price: "Price",
+    buyUsage: "Use `Nbuy player <listingId>` for market purchases.",
+    listingGone: "That listing is gone.",
+    buyOwnListing: "Buying your own listing is just advanced confusion.",
+    needToBuy: (price) => `You need ${formatCoins(price)} to buy that.`,
+    marketPurchase: "Market Purchase",
+    purchaseDescription: (title, price) => `You bought **${title}** for ${formatCoins(price)}.`,
+    buyerGoods: "Buyer Goods",
+    storedGoods: (count) => `${count} stored goods`,
+    sellerId: "Seller ID",
+    auctionStartPositive: "Auction start bid must be a valid positive number.",
+    auctionStarted: "Auction Started",
+    auctionStartedDescription: (title) => `You started an auction for **${title}**.`,
+    auctionId: "Auction ID",
+    startingBid: "Starting Bid",
+    settledEarlier: "Settled Earlier",
+    auctionInactive: "That auction is not active.",
+    ownAuctionBid: "You cannot bid on your own auction.",
+    alreadyTopBid: "You already hold the top bid. Let somebody else panic.",
+    minimumBid: (amount) => `Minimum valid bid is ${formatCoins(amount)}.`,
+    needWalletBid: (amount) => `You need ${formatCoins(amount)} in your wallet.`,
+    bidPlaced: "Auction Bid Placed",
+    bidPlacedDescription: (amount, title) =>
+      `You slapped down ${formatCoins(amount)} on **${title}** and dared the server to top it.`,
+    previousBid: "Previous Bid",
+    auctionBoard: "Auction Board",
+    auctionBoardDescription: "Use `Nauction start <item> <startBid>` or `Nauction bid <id> <amount>`.",
+    activeAuctions: "Active Auctions",
+    noActiveAuctions: "No active auctions yet.",
+    justSettled: "Just Settled",
+    quizTime: "Quiz Time",
+    hint: "Hint",
+    answerWith: "Answer With",
+    quizExpired: "That quiz expired. Run `Nquiz` again for a fresh one.",
+    quizSolved: "Quiz Solved",
+    quizSolvedDescription: "Correct. The trivia goblin has been silenced for now.",
+    reward: "Reward",
+    streak: "Streak",
+    quizMissed: "Quiz Missed",
+    quizMissedDescription: (answer) => `Wrong answer. The correct answer was **${answer}**.`,
+    streakReset: "Reset to 0",
+    fastType: "Fast Type",
+    fastTypeDescription: (phrase) => `Type this exactly: **${phrase}**`,
+    submitWith: "Submit With",
+    fastTypeExpired: "That fast type prompt expired. Run `Nfasttype` again.",
+    fastTypeClear: "Fast Type Clear",
+    fastTypeClearDescription: "Perfect copy. Your fingers are officially sponsored by panic.",
+    fastTypeMiss: "Fast Type Miss",
+    fastTypeMissDescription: (phrase) => `Close, but the phrase was **${phrase}**.`
+  };
+}
 
 const marketMinigameMethods = {
   async handleMarket(context) {
     return this.db.withTransaction(async (tx) => {
+      const language = this.resolveLanguage(context);
+      const copy = getMarketCopy(language);
       const settled = await this.settleExpiredAuctions(tx);
       const listings = await this.marketRepository.listActiveListings(8, tx);
       const auctions = await this.marketRepository.listActiveAuctions(5, tx);
 
       return {
-        title: "Player Market",
-        description: "Live-service bazaar energy. Listings on the left, active auctions on the right, scams hopefully minimal.",
+        title: copy.marketTitle,
+        description: copy.marketDescription,
         fields: [
           {
-            name: "Listings",
+            name: copy.listings,
             value: listings.length
               ? listings
                   .map(
@@ -21,26 +173,26 @@ const marketMinigameMethods = {
                       `#${listing.id} ${listing.title} - ${formatCoins(listing.price)} by ${listing.seller_name}`
                   )
                   .join("\n")
-              : "No listings yet. Use `Nsell player <item> <price>`.",
+              : copy.noListings,
             inline: false
           },
           {
-            name: "Auctions",
+            name: copy.auctions,
             value: auctions.length
               ? auctions
                   .map(
                     (auction) =>
                       `#${auction.id} ${auction.title} - bid ${formatCoins(auction.current_bid)} by ${
-                        auction.bidder_name || "nobody"
+                        auction.bidder_name || copy.nobody
                       }`
                   )
                   .join("\n")
-              : "No active auctions. Use `Nauction start <item> <startBid>`.",
+              : copy.noAuctions,
             inline: false
           },
           {
-            name: "Auto Settled",
-            value: `${settled.sold} sold / ${settled.expired} expired`,
+            name: copy.autoSettled,
+            value: copy.soldExpired(settled.sold, settled.expired),
             inline: true
           }
         ]
@@ -50,16 +202,18 @@ const marketMinigameMethods = {
 
   async handleSell(context) {
     return this.db.withTransaction(async (tx) => {
-      const { actor } = await this.getActorBundle(context, tx);
+      const { actor, state } = await this.getActorBundle(context, tx);
+      const language = this.resolveLanguage(context, state);
+      const copy = getMarketCopy(language);
       const args = this.cleanArgs(context.args);
       const category = this.normalizeAnswer(args[0] || "");
       if (category !== "player") {
-        throw new Error("Right now the player market uses `Nsell player <item name> <price>`.");
+        throw new Error(copy.sellUsage);
       }
 
       const price = this.parseAmount(args[args.length - 1], 0, Number.MAX_SAFE_INTEGER);
       if (price <= 0) {
-        throw new Error("End your command with a valid price.");
+        throw new Error(copy.validPrice);
       }
 
       const titleTokens = args.slice(1, -1);
@@ -80,16 +234,16 @@ const marketMinigameMethods = {
       );
 
       return {
-        title: "Listing Created",
-        description: `You listed **${title}** on the player market.`,
+        title: copy.listingCreated,
+        description: copy.listingDescription(title),
         fields: [
           {
-            name: "Listing ID",
+            name: copy.listingId,
             value: `#${listing.id}`,
             inline: true
           },
           {
-            name: "Price",
+            name: copy.price,
             value: formatCoins(price),
             inline: true
           }
@@ -102,24 +256,26 @@ const marketMinigameMethods = {
     return this.db.withTransaction(async (tx) => {
       const args = this.cleanArgs(context.args);
       const category = this.normalizeAnswer(args[0] || "");
+      const { actor, summary, state } = await this.getActorBundle(context, tx);
+      const language = this.resolveLanguage(context, state);
+      const copy = getMarketCopy(language);
       if (category !== "player") {
-        throw new Error("Use `Nbuy player <listingId>` for market purchases.");
+        throw new Error(copy.buyUsage);
       }
 
       const listingId = this.parseCount(args[1], 0, 1, Number.MAX_SAFE_INTEGER);
-      const { actor, summary } = await this.getActorBundle(context, tx);
       const listing = await this.marketRepository.getListingById(listingId, tx, { forUpdate: true });
 
       if (!listing || !listing.active) {
-        throw new Error("That listing is gone.");
+        throw new Error(copy.listingGone);
       }
 
       if (Number(listing.seller_user_id) === Number(actor.id)) {
-        throw new Error("Buying your own listing is just advanced confusion.");
+        throw new Error(copy.buyOwnListing);
       }
 
       if (Number(summary.wallet) < Number(listing.price)) {
-        throw new Error(`You need ${formatCoins(listing.price)} to buy that.`);
+        throw new Error(copy.needToBuy(listing.price));
       }
 
       const states = await this.playerStateRepository.getStates([actor.id, listing.seller_user_id], tx, {
@@ -138,19 +294,24 @@ const marketMinigameMethods = {
       this.pushOwnedGood(buyerState, listing.title);
 
       await this.playerStateRepository.saveState(actor.id, buyerState.systems, buyerState.settings, tx);
-      await this.playerStateRepository.saveState(Number(listing.seller_user_id), sellerState.systems, sellerState.settings, tx);
+      await this.playerStateRepository.saveState(
+        Number(listing.seller_user_id),
+        sellerState.systems,
+        sellerState.settings,
+        tx
+      );
 
       return {
-        title: "Market Purchase",
-        description: `You bought **${listing.title}** for ${formatCoins(listing.price)}.`,
+        title: copy.marketPurchase,
+        description: copy.purchaseDescription(listing.title, listing.price),
         fields: [
           {
-            name: "Buyer Goods",
-            value: `${buyerState.systems.market.ownedGoods.length} stored goods`,
+            name: copy.buyerGoods,
+            value: copy.storedGoods(buyerState.systems.market.ownedGoods.length),
             inline: true
           },
           {
-            name: "Seller ID",
+            name: copy.sellerId,
             value: `${listing.seller_user_id}`,
             inline: true
           }
@@ -163,13 +324,17 @@ const marketMinigameMethods = {
     return this.db.withTransaction(async (tx) => {
       const args = this.cleanArgs(context.args);
       const subcommand = this.normalizeAnswer(args[0] || "view");
+      const language = this.resolveLanguage(context);
+      const copy = getMarketCopy(language);
       const settled = await this.settleExpiredAuctions(tx);
 
       if (subcommand === "start" || subcommand === "create") {
-        const { actor } = await this.getActorBundle(context, tx);
+        const { actor, state } = await this.getActorBundle(context, tx);
+        const activeLanguage = this.resolveLanguage(context, state);
+        const activeCopy = getMarketCopy(activeLanguage);
         const startingBid = this.parseAmount(args[args.length - 1], 0, Number.MAX_SAFE_INTEGER);
         if (startingBid <= 0) {
-          throw new Error("Auction start bid must be a valid positive number.");
+          throw new Error(activeCopy.auctionStartPositive);
         }
 
         const title = args.slice(1, -1).join(" ").trim() || this.pick(MARKET_TEMPLATES);
@@ -186,22 +351,22 @@ const marketMinigameMethods = {
         );
 
         return {
-          title: "Auction Started",
-          description: `You started an auction for **${title}**.`,
+          title: activeCopy.auctionStarted,
+          description: activeCopy.auctionStartedDescription(title),
           fields: [
             {
-              name: "Auction ID",
+              name: activeCopy.auctionId,
               value: `#${auction.id}`,
               inline: true
             },
             {
-              name: "Starting Bid",
+              name: activeCopy.startingBid,
               value: formatCoins(startingBid),
               inline: true
             },
             {
-              name: "Settled Earlier",
-              value: `${settled.sold} sold / ${settled.expired} expired`,
+              name: activeCopy.settledEarlier,
+              value: activeCopy.soldExpired(settled.sold, settled.expired),
               inline: true
             }
           ]
@@ -211,30 +376,32 @@ const marketMinigameMethods = {
       if (subcommand === "bid") {
         const auctionId = this.parseCount(args[1], 0, 1, Number.MAX_SAFE_INTEGER);
         const bidAmount = this.parseAmount(args[2], 0, Number.MAX_SAFE_INTEGER);
-        const { actor, summary } = await this.getActorBundle(context, tx);
+        const { actor, summary, state } = await this.getActorBundle(context, tx);
+        const activeLanguage = this.resolveLanguage(context, state);
+        const activeCopy = getMarketCopy(activeLanguage);
         const auction = await this.marketRepository.getAuctionById(auctionId, tx, { forUpdate: true });
 
         if (!auction || auction.status !== "active") {
-          throw new Error("That auction is not active.");
+          throw new Error(activeCopy.auctionInactive);
         }
 
         if (Number(auction.seller_user_id) === Number(actor.id)) {
-          throw new Error("You cannot bid on your own auction.");
+          throw new Error(activeCopy.ownAuctionBid);
         }
 
         if (Number(auction.current_bidder_user_id || 0) === Number(actor.id)) {
-          throw new Error("You already hold the top bid. Let somebody else panic.");
+          throw new Error(activeCopy.alreadyTopBid);
         }
 
         const minimumBid = auction.current_bidder_user_id
           ? Number(auction.current_bid) + 100
           : Number(auction.starting_bid);
         if (bidAmount < minimumBid) {
-          throw new Error(`Minimum valid bid is ${formatCoins(minimumBid)}.`);
+          throw new Error(activeCopy.minimumBid(minimumBid));
         }
 
         if (Number(summary.wallet) < bidAmount) {
-          throw new Error(`You need ${formatCoins(bidAmount)} in your wallet.`);
+          throw new Error(activeCopy.needWalletBid(bidAmount));
         }
 
         await this.economyRepository.mutateWallet(actor.id, -bidAmount, "auction_bid_hold", tx);
@@ -250,16 +417,16 @@ const marketMinigameMethods = {
         await this.marketRepository.placeBid(auctionId, actor.id, bidAmount, tx);
 
         return {
-          title: "Auction Bid Placed",
-          description: `You slapped down ${formatCoins(bidAmount)} on **${auction.title}** and dared the server to top it.`,
+          title: activeCopy.bidPlaced,
+          description: activeCopy.bidPlacedDescription(bidAmount, auction.title),
           fields: [
             {
-              name: "Auction ID",
+              name: activeCopy.auctionId,
               value: `#${auctionId}`,
               inline: true
             },
             {
-              name: "Previous Bid",
+              name: activeCopy.previousBid,
               value: formatCoins(auction.current_bid),
               inline: true
             }
@@ -269,26 +436,26 @@ const marketMinigameMethods = {
 
       const auctions = await this.marketRepository.listActiveAuctions(8, tx);
       return {
-        title: "Auction Board",
-        description: "Use `Nauction start <item> <startBid>` or `Nauction bid <id> <amount>`.",
+        title: copy.auctionBoard,
+        description: copy.auctionBoardDescription,
         fields: [
           {
-            name: "Active Auctions",
+            name: copy.activeAuctions,
             value: auctions.length
               ? auctions
                   .map(
                     (auction) =>
                       `#${auction.id} ${auction.title} - ${formatCoins(auction.current_bid)} by ${
-                        auction.bidder_name || "nobody"
+                        auction.bidder_name || copy.nobody
                       }`
                   )
                   .join("\n")
-              : "No active auctions yet.",
+              : copy.noActiveAuctions,
             inline: false
           },
           {
-            name: "Just Settled",
-            value: `${settled.sold} sold / ${settled.expired} expired`,
+            name: copy.justSettled,
+            value: copy.soldExpired(settled.sold, settled.expired),
             inline: true
           }
         ]
@@ -299,30 +466,34 @@ const marketMinigameMethods = {
   async handleQuiz(context) {
     return this.db.withTransaction(async (tx) => {
       const { actor, state } = await this.getActorBundle(context, tx, { forUpdate: true });
+      const language = this.resolveLanguage(context, state);
+      const copy = getMarketCopy(language);
       const answer = this.cleanArgs(context.args).join(" ").trim();
       const pending = state.systems.minigames.pendingQuiz;
 
       if (!pending || !answer) {
         const quiz = this.pick(QUIZ_BANK);
+        const prompt = getQuizPrompt(quiz, language);
+        const hint = getQuizHint(quiz, language);
         state.systems.minigames.pendingQuiz = {
           answer: quiz.answer,
-          prompt: quiz.prompt,
-          hint: quiz.hint,
+          prompt,
+          hint,
           expiresAt: new Date(Date.now() + 10 * 60 * 1000).toISOString()
         };
         await this.playerStateRepository.saveState(actor.id, state.systems, state.settings, tx);
 
         return {
-          title: "Quiz Time",
-          description: quiz.prompt,
+          title: copy.quizTime,
+          description: prompt,
           fields: [
             {
-              name: "Hint",
-              value: quiz.hint,
+              name: copy.hint,
+              value: hint,
               inline: false
             },
             {
-              name: "Answer With",
+              name: copy.answerWith,
               value: "`Nquiz <answer>`",
               inline: false
             }
@@ -333,7 +504,7 @@ const marketMinigameMethods = {
       if (new Date(pending.expiresAt).getTime() < Date.now()) {
         state.systems.minigames.pendingQuiz = null;
         await this.playerStateRepository.saveState(actor.id, state.systems, state.settings, tx);
-        throw new Error("That quiz expired. Run `Nquiz` again for a fresh one.");
+        throw new Error(copy.quizExpired);
       }
 
       const correct = this.normalizeAnswer(answer) === this.normalizeAnswer(pending.answer);
@@ -347,16 +518,16 @@ const marketMinigameMethods = {
         await this.playerStateRepository.saveState(actor.id, state.systems, state.settings, tx);
 
         return {
-          title: "Quiz Solved",
-          description: "Correct. The trivia goblin has been silenced for now.",
+          title: copy.quizSolved,
+          description: copy.quizSolvedDescription,
           fields: [
             {
-              name: "Reward",
+              name: copy.reward,
               value: formatCoins(reward),
               inline: true
             },
             {
-              name: "Streak",
+              name: copy.streak,
               value: `${state.systems.minigames.streak}`,
               inline: true
             }
@@ -368,12 +539,12 @@ const marketMinigameMethods = {
       await this.playerStateRepository.saveState(actor.id, state.systems, state.settings, tx);
 
       return {
-        title: "Quiz Missed",
-        description: `Wrong answer. The correct answer was **${pending.answer}**.`,
+        title: copy.quizMissed,
+        description: copy.quizMissedDescription(pending.answer),
         fields: [
           {
-            name: "Streak",
-            value: "Reset to 0",
+            name: copy.streak,
+            value: copy.streakReset,
             inline: true
           }
         ]
@@ -384,6 +555,8 @@ const marketMinigameMethods = {
   async handleFasttype(context) {
     return this.db.withTransaction(async (tx) => {
       const { actor, state } = await this.getActorBundle(context, tx, { forUpdate: true });
+      const language = this.resolveLanguage(context, state);
+      const copy = getMarketCopy(language);
       const input = this.cleanArgs(context.args).join(" ").trim();
       const pending = state.systems.minigames.pendingFasttype;
 
@@ -396,11 +569,11 @@ const marketMinigameMethods = {
         await this.playerStateRepository.saveState(actor.id, state.systems, state.settings, tx);
 
         return {
-          title: "Fast Type",
-          description: `Type this exactly: **${phrase}**`,
+          title: copy.fastType,
+          description: copy.fastTypeDescription(phrase),
           fields: [
             {
-              name: "Submit With",
+              name: copy.submitWith,
               value: "`Nfasttype <phrase>`",
               inline: false
             }
@@ -411,7 +584,7 @@ const marketMinigameMethods = {
       if (new Date(pending.expiresAt).getTime() < Date.now()) {
         state.systems.minigames.pendingFasttype = null;
         await this.playerStateRepository.saveState(actor.id, state.systems, state.settings, tx);
-        throw new Error("That fast type prompt expired. Run `Nfasttype` again.");
+        throw new Error(copy.fastTypeExpired);
       }
 
       const correct = input === pending.phrase;
@@ -424,11 +597,11 @@ const marketMinigameMethods = {
         await this.playerStateRepository.saveState(actor.id, state.systems, state.settings, tx);
 
         return {
-          title: "Fast Type Clear",
-          description: "Perfect copy. Your fingers are officially sponsored by panic.",
+          title: copy.fastTypeClear,
+          description: copy.fastTypeClearDescription,
           fields: [
             {
-              name: "Reward",
+              name: copy.reward,
               value: formatCoins(reward),
               inline: true
             }
@@ -438,8 +611,8 @@ const marketMinigameMethods = {
 
       await this.playerStateRepository.saveState(actor.id, state.systems, state.settings, tx);
       return {
-        title: "Fast Type Miss",
-        description: `Close, but the phrase was **${pending.phrase}**.`,
+        title: copy.fastTypeMiss,
+        description: copy.fastTypeMissDescription(pending.phrase),
         fields: []
       };
     });

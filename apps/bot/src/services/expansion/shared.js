@@ -97,6 +97,17 @@ const sharedMethods = {
     return `${(Number(value) * 100).toFixed(1)}%`;
   },
 
+  resolveLanguage(context, state) {
+    return normalizeLanguage(
+      state?.settings?.language || context?.language || context?.config?.defaultLanguage,
+      "en"
+    );
+  },
+
+  isVietnameseLanguage(language) {
+    return String(language || "").toLowerCase().startsWith("vi");
+  },
+
   getTranslator(context) {
     if (typeof context?.t === "function") {
       return context.t;
@@ -187,12 +198,52 @@ const sharedMethods = {
     return `${getMoodEmoji(activePet)} ${getPetFormName(activePet)}`;
   },
 
-  getPartnerLabel(usersById, partnerUserId) {
+  getPartnerLabel(usersById, partnerUserId, language) {
     if (!partnerUserId) {
-      return "Nobody yet";
+      return this.isVietnameseLanguage(language) ? "Chưa có" : "Nobody yet";
     }
 
     return usersById.get(partnerUserId)?.username || `User #${partnerUserId}`;
+  },
+
+  getLocalizedPetName(pet, language) {
+    if (!pet) {
+      return null;
+    }
+
+    return this.isVietnameseLanguage(language) && pet.nameVi ? pet.nameVi : pet.name;
+  },
+
+  getLocalizedHouseLabel(style, language) {
+    if (!style) {
+      return null;
+    }
+
+    return this.isVietnameseLanguage(language) && style.labelVi ? style.labelVi : style.label;
+  },
+
+  getLocalizedZoneLabel(zone, language) {
+    if (!zone) {
+      return null;
+    }
+
+    return this.isVietnameseLanguage(language) && zone.labelVi ? zone.labelVi : zone.label;
+  },
+
+  getLocalizedZoneDescription(zone, language) {
+    if (!zone) {
+      return "";
+    }
+
+    return this.isVietnameseLanguage(language) && zone.descriptionVi ? zone.descriptionVi : zone.description;
+  },
+
+  getLocalizedRewardDescription(reward, language) {
+    if (!reward) {
+      return "";
+    }
+
+    return this.isVietnameseLanguage(language) && reward.descriptionVi ? reward.descriptionVi : reward.description;
   },
 
   pushOwnedGood(state, title) {

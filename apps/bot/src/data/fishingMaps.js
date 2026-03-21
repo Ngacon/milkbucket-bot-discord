@@ -42,6 +42,7 @@ const FISHING_MAPS = [
   map({
     key: "milk_docks",
     label: "Milk Docks",
+    labelVi: "Bến Sữa",
     aliases: ["docks", "milk", "harbor"],
     unlockLevel: 1,
     fare: 0,
@@ -49,6 +50,7 @@ const FISHING_MAPS = [
     rewardRange: [80, 150],
     chestChance: 0.1,
     description: "A cozy beginner port with easy bites, loud gulls, and suspiciously cheap bait.",
+    descriptionVi: "Bến cảng dễ câu cho người mới, hải âu la oai oái và mồi câu rẻ một cách đáng ngờ.",
     fish: [
       fish("milk_sardine", "Milk Sardine", "common", 28, 18, 34, 0.3, 0.9, 12, 26),
       fish("dock_minnow", "Dock Minnow", "common", 24, 20, 38, 0.4, 1.1, 14, 30),
@@ -65,6 +67,7 @@ const FISHING_MAPS = [
   map({
     key: "coral_garden",
     label: "Coral Garden",
+    labelVi: "Vườn San Hô",
     aliases: ["coral", "reef", "garden"],
     unlockLevel: 3,
     fare: 220,
@@ -72,6 +75,7 @@ const FISHING_MAPS = [
     rewardRange: [120, 220],
     chestChance: 0.13,
     description: "Bright reef lanes packed with colorful fish, fast bites, and clean progression.",
+    descriptionVi: "Những lối rạn sáng rực đầy cá màu mè, cá cắn nhanh và tiến trình rất mượt.",
     fish: [
       fish("coral_dart", "Coral Dart", "common", 26, 26, 42, 0.4, 1.0, 14, 28),
       fish("reef_popper", "Reef Popper", "common", 22, 30, 48, 0.6, 1.3, 18, 32),
@@ -88,6 +92,7 @@ const FISHING_MAPS = [
   map({
     key: "kelp_labyrinth",
     label: "Kelp Labyrinth",
+    labelVi: "Mê Cung Rong Bẹ",
     aliases: ["kelp", "forest", "labyrinth"],
     unlockLevel: 4,
     fare: 320,
@@ -95,6 +100,7 @@ const FISHING_MAPS = [
     rewardRange: [135, 235],
     chestChance: 0.14,
     description: "Dense kelp tunnels where fish hide hard and loot quality starts climbing.",
+    descriptionVi: "Đường hầm rong bẹ dày đặc, cá trốn kỹ hơn và chất lượng loot bắt đầu leo lên.",
     fish: [
       fish("kelp_drifter", "Kelp Drifter", "common", 25, 32, 50, 0.5, 1.1, 16, 30),
       fish("weed_skater", "Weed Skater", "common", 21, 36, 54, 0.7, 1.4, 18, 34),
@@ -111,6 +117,7 @@ const FISHING_MAPS = [
   map({
     key: "stormbreak_cove",
     label: "Stormbreak Cove",
+    labelVi: "Vịnh Bão Vỡ",
     aliases: ["storm", "cove", "break"],
     unlockLevel: 5,
     fare: 420,
@@ -118,6 +125,7 @@ const FISHING_MAPS = [
     rewardRange: [150, 270],
     chestChance: 0.16,
     description: "Windy water with faster bites, meaner fish, and better payout spikes.",
+    descriptionVi: "Vùng nước gió giật, cá cắn nhanh hơn, hung hơn và tiền thưởng bật mạnh hơn.",
     fish: [
       fish("foam_mullet", "Foam Mullet", "common", 24, 38, 58, 0.6, 1.3, 18, 32),
       fish("gust_bass", "Gust Bass", "common", 20, 42, 62, 0.8, 1.6, 22, 38),
@@ -134,6 +142,7 @@ const FISHING_MAPS = [
   map({
     key: "moonreef_harbor",
     label: "Moonreef Harbor",
+    labelVi: "Cảng Rạn Trăng",
     aliases: ["moonreef", "moon", "harbor_night"],
     unlockLevel: 6,
     fare: 520,
@@ -141,6 +150,7 @@ const FISHING_MAPS = [
     rewardRange: [165, 290],
     chestChance: 0.17,
     description: "Night-lit water with cleaner rare odds and some very shiny flex fish.",
+    descriptionVi: "Mặt nước sáng đêm với tỉ lệ cá hiếm đẹp hơn và vài con shiny để khoe cực gắt.",
     fish: [
       fish("luna_shrimp", "Luna Shrimp", "common", 23, 44, 64, 0.6, 1.2, 16, 30),
       fish("night_blenny", "Night Blenny", "common", 19, 48, 70, 0.9, 1.7, 20, 36),
@@ -157,6 +167,7 @@ const FISHING_MAPS = [
   map({
     key: "neon_bazaar",
     label: "Neon Bazaar",
+    labelVi: "Chợ Neon",
     aliases: ["neon", "bazaar", "market"],
     unlockLevel: 7,
     fare: 650,
@@ -164,6 +175,7 @@ const FISHING_MAPS = [
     rewardRange: [180, 310],
     chestChance: 0.18,
     description: "City-water chaos with pricey fish, flashy variants, and strong collection value.",
+    descriptionVi: "Nước chảy giữa phố hỗn loạn, cá đắt tiền, biến thể chói lóa và giá trị sưu tầm cao.",
     fish: [
       fish("wire_guppy", "Wire Guppy", "common", 22, 52, 74, 0.7, 1.4, 18, 32),
       fish("spark_tetra", "Spark Tetra", "common", 18, 56, 80, 0.9, 1.8, 22, 36),
@@ -180,6 +192,7 @@ const FISHING_MAPS = [
   map({
     key: "sunken_palace",
     label: "Sunken Palace",
+    labelVi: "Cung Điện Chìm",
     aliases: ["palace", "sunken", "ruins"],
     unlockLevel: 8,
     fare: 780,
@@ -187,6 +200,7 @@ const FISHING_MAPS = [
     rewardRange: [210, 360],
     chestChance: 0.2,
     description: "Treasure-heavy ruins where the fish are elegant and the chests start showing up.",
+    descriptionVi: "Tàn tích ngập kho báu, cá ở đây sang chảnh và rương bắt đầu xuất hiện thường xuyên.",
     fish: [
       fish("ruin_carp", "Ruin Carp", "common", 21, 60, 84, 0.8, 1.5, 20, 34),
       fish("tile_blade", "Tile Bladefish", "common", 17, 64, 90, 1.0, 1.9, 24, 38),
@@ -203,6 +217,7 @@ const FISHING_MAPS = [
   map({
     key: "volcano_core",
     label: "Volcano Core",
+    labelVi: "Lõi Núi Lửa",
     aliases: ["volcano", "lava", "core"],
     unlockLevel: 9,
     fare: 960,
@@ -210,6 +225,7 @@ const FISHING_MAPS = [
     rewardRange: [230, 390],
     chestChance: 0.22,
     description: "Hot water, angry fish, bigger payouts, and a much sharper durability tax.",
+    descriptionVi: "Nước nóng, cá gắt, payout lớn hơn và độ bền dụng cụ tụt đau hơn hẳn.",
     fish: [
       fish("ash_chub", "Ash Chub", "common", 20, 68, 92, 0.9, 1.6, 22, 36),
       fish("ember_minnow", "Ember Minnow", "common", 16, 74, 100, 1.1, 2.0, 24, 40),
@@ -226,6 +242,7 @@ const FISHING_MAPS = [
   map({
     key: "glacier_basin",
     label: "Glacier Basin",
+    labelVi: "Lòng Chảo Băng Hà",
     aliases: ["glacier", "ice", "basin"],
     unlockLevel: 10,
     fare: 1120,
@@ -233,6 +250,7 @@ const FISHING_MAPS = [
     rewardRange: [245, 410],
     chestChance: 0.23,
     description: "Cold, slow water with expensive catches and strong shiny flex potential.",
+    descriptionVi: "Mặt nước lạnh và chậm, cá bắt được rất giá trị và cực hợp để flex shiny.",
     fish: [
       fish("frost_sardine", "Frost Sardine", "common", 19, 72, 98, 0.8, 1.5, 20, 34),
       fish("ice_runner", "Ice Runner", "common", 15.5, 78, 106, 1.0, 1.9, 24, 38),
@@ -249,6 +267,7 @@ const FISHING_MAPS = [
   map({
     key: "starfall_abyss",
     label: "Starfall Abyss",
+    labelVi: "Vực Sao Rơi",
     aliases: ["abyss", "starfall", "void"],
     unlockLevel: 12,
     fare: 1450,
@@ -256,6 +275,7 @@ const FISHING_MAPS = [
     rewardRange: [280, 520],
     chestChance: 0.28,
     description: "Late-game deep water with brutal odds, absurd value, and cosmic flex fish.",
+    descriptionVi: "Vùng nước sâu cuối game với tỉ lệ khắc nghiệt, giá trị phi lý và cá flex mang tầm vũ trụ.",
     fish: [
       fish("abyss_shiner", "Abyss Shiner", "common", 18, 86, 116, 1.0, 1.8, 24, 38),
       fish("void_rasbora", "Void Rasbora", "common", 14.5, 92, 124, 1.2, 2.2, 28, 42),

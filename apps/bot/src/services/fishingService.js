@@ -12,6 +12,28 @@ const {
 const CACHE_TTL_MS = 25 * 1000;
 const LEADERBOARD_TTL_MS = 30 * 1000;
 
+function isVietnameseLanguage(language) {
+  return String(language || "").toLowerCase().startsWith("vi");
+}
+
+function getFishingCopy(language) {
+  if (isVietnameseLanguage(language)) {
+    return {
+      unknownMap: (mapKey) => `Không tìm thấy bản đồ câu cá: ${mapKey}`,
+      noRod: "Bạn chưa trang bị cần câu. Sự nghiệp câu cá hiện chỉ là nhìn mặt nước thật căng.",
+      brokenRod: "Cần câu của bạn gãy đôi rồi. Sửa nó trước khi tiếp tục quậy đại dương.",
+      levelGate: (unlockLevel, label) => `Bạn cần đạt level ${unlockLevel} để câu ở ${label}.`
+    };
+  }
+
+  return {
+    unknownMap: (mapKey) => `Unknown fishing map: ${mapKey}`,
+    noRod: "No rod equipped. Your fish career is currently just intense staring.",
+    brokenRod: "Your rod is snapped in half. Repair it before bullying the ocean.",
+    levelGate: (unlockLevel, label) => `You need to be level ${unlockLevel} to fish in ${label}.`
+  };
+}
+
 class FishingService {
   constructor({
     db,
@@ -73,12 +95,20 @@ class FishingService {
     );
   }
 
-  getMapOrThrow(mapKey) {
+  getMapOrThrow(mapKey, language) {
     const map = FISHING_MAPS_BY_KEY.get(mapKey);
     if (!map) {
-      throw new Error(`Unknown fishing map: ${mapKey}`);
+      throw new Error(getFishingCopy(language).unknownMap(mapKey));
     }
-    return map;
+    if (!isVietnameseLanguage(language)) {
+      return map;
+    }
+
+    return {
+      ...map,
+      label: map.labelVi || map.label,
+      description: map.descriptionVi || map.description
+    };
   }
 
   resolveMapKey(rawMapKey, fallbackMapKey) {
@@ -86,16 +116,17 @@ class FishingService {
     return resolved || fallbackMapKey;
   }
 
-  async getFishingStateBundle(userId, tx, rawMapKey = "") {
+  async getFishingStateBundle(userId, tx, rawMapKey = "", language) {
     const state = await this.playerStateRepository.getState(userId, tx, { forUpdate: true });
     const currentMapKey = state.systems.world.zone || "milk_docks";
     const mapKey = this.resolveMapKey(rawMapKey, currentMapKey);
-    const map = this.getMapOrThrow(mapKey);
+    const map = this.getMapOrThrow(mapKey, language);
     return { state, currentMapKey, mapKey, map };
   }
 
   async castLine(discordUser, rawMapKey = "", options = {}) {
     return this.db.withTransaction(async (tx) => {
+      const copy = getFishingCopy(options.language);
       const user = await this.resolveUser(discordUser, tx, options);
       if (!options.skipBootstrap) {
         await this.economyRepository.ensureAccount(user.id, tx);
@@ -104,16 +135,16 @@ class FishingService {
 
       const loadout = await this.inventoryRepository.getFishingLoadout(user.id, tx);
       if (!loadout.rod) {
-        throw new Error("No rod equipped. Your fish career is currently just intense staring.");
+        throw new Error(copy.noRod);
       }
 
       if ((loadout.rod.durability || 0) <= 0) {
-        throw new Error("Your rod is snapped in half. Repair it before bullying the ocean.");
+        throw new Error(copy.brokenRod);
       }
 
-      const { state, mapKey, map } = await this.getFishingStateBundle(user.id, tx, rawMapKey);
+      const { state, mapKey, map } = await this.getFishingStateBundle(user.id, tx, rawMapKey, options.language);
       if (Number(user.level) < map.unlockLevel) {
-        throw new Error(`You need to be level ${map.unlockLevel} to fish in ${map.label}.`);
+        throw new Error(copy.levelGate(map.unlockLevel, map.label));
       }
 
       let activePet = null;
@@ -244,7 +275,7 @@ class FishingService {
       const state = await this.playerStateRepository.getState(user.id, tx);
       const currentMapKey = state.systems.world.zone || "milk_docks";
       const mapKey = this.resolveMapKey(options.mapKey || "", currentMapKey);
-      const map = this.getMapOrThrow(mapKey);
+      const map = this.getMapOrThrow(mapKey, options.language);
       const progress = await this.fishRepository.getCollectionProgress(user.id, mapKey, tx);
       const overall = await this.fishRepository.getOverallCollection(user.id, tx);
       const loadout = await this.inventoryRepository.getFishingLoadout(user.id, tx);
@@ -274,7 +305,7 @@ class FishingService {
       const state = await this.playerStateRepository.getState(user.id, tx);
       const currentMapKey = state.systems.world.zone || "milk_docks";
       const mapKey = this.resolveMapKey(options.mapKey || "", currentMapKey);
-      const map = this.getMapOrThrow(mapKey);
+      const map = this.getMapOrThrow(mapKey, options.language);
       const progress = await this.fishRepository.getCollectionProgress(user.id, mapKey, tx);
       const overall = await this.fishRepository.getOverallCollection(user.id, tx);
 

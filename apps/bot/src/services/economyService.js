@@ -8,6 +8,34 @@ const {
   calculatePetPassiveBonus
 } = require("./expansion/petEngine");
 
+function isVietnameseLanguage(language) {
+  return String(language || "").toLowerCase().startsWith("vi");
+}
+
+function getEconomyCopy(language) {
+  if (isVietnameseLanguage(language)) {
+    return {
+      invalidBet: (rawInput) => `Cược \`${rawInput}\` bị lỗi rồi. Thử nhập số sạch hoặc \`all\`.`,
+      imaginaryBet: "Bạn không thể cược coin tưởng tượng. Hãy nhập số lớn hơn 0.",
+      walletOnlyHas: (wallet) => `Ví của bạn chỉ có ${wallet}. Bảo kê sòng bạc lắc đầu.`,
+      rebateBoth: (petName, currentText) =>
+        currentText
+          ? `${currentText} ${petName} còn cào về được một khoản hoàn tiền.`
+          : `${petName} còn cào về được một khoản hoàn tiền nhỏ.`
+    };
+  }
+
+  return {
+    invalidBet: (rawInput) => `Bet \`${rawInput}\` is cursed. Try a clean number or \`all\`.`,
+    imaginaryBet: "You cannot bet imaginary coins. Try a number above 0.",
+    walletOnlyHas: (wallet) => `Your wallet only has ${wallet}. The casino bouncer said no.`,
+    rebateBoth: (petName, currentText) =>
+      currentText
+        ? `${currentText} ${petName} clawed back a rebate.`
+        : `${petName} clawed back a small rebate.`
+  };
+}
+
 class EconomyService {
   constructor({ db, apiClient, userRepository, economyRepository, playerStateRepository }) {
     this.db = db;
@@ -28,7 +56,7 @@ class EconomyService {
     );
   }
 
-  normalizeBetInput(rawInput, wallet) {
+  normalizeBetInput(rawInput, wallet, language) {
     if (!rawInput) {
       return 100;
     }
@@ -40,7 +68,7 @@ class EconomyService {
 
     const parsed = Number(normalized.replace(/,/g, ""));
     if (!Number.isFinite(parsed)) {
-      throw new Error(`Bet \`${rawInput}\` is cursed. Try a clean number or \`all\`.`);
+      throw new Error(getEconomyCopy(language).invalidBet(rawInput));
     }
 
     return Math.floor(parsed);
@@ -60,20 +88,19 @@ class EconomyService {
 
   async playCoinflip(discordUser, choice, rawBet, options = {}) {
     return this.db.withTransaction(async (tx) => {
+      const copy = getEconomyCopy(options.language);
       const user = await this.resolveActor(discordUser, tx, options);
       const account = options.skipBootstrap
         ? await this.economyRepository.getSummary(user.id, tx)
         : await this.economyRepository.ensureAccount(user.id, tx);
-      const bet = this.normalizeBetInput(rawBet, Number(account.wallet));
+      const bet = this.normalizeBetInput(rawBet, Number(account.wallet), options.language);
 
       if (bet <= 0) {
-        throw new Error("You cannot bet imaginary coins. Try a number above 0.");
+        throw new Error(copy.imaginaryBet);
       }
 
       if (Number(account.wallet) < bet) {
-        throw new Error(
-          `Your wallet only has ${formatCoins(account.wallet)}. The casino bouncer said no.`
-        );
+        throw new Error(copy.walletOnlyHas(formatCoins(account.wallet)));
       }
 
       let petState = null;
@@ -108,9 +135,7 @@ class EconomyService {
           const rebate = Math.floor(bet * Math.min(0.14, petBonus * 0.32));
           result.profit += rebate;
           result.pet_bonus = rebate;
-          result.mood_text = result.mood_text
-            ? `${result.mood_text} ${activePet.nickname} clawed back a rebate.`
-            : `${activePet.nickname} clawed back a small rebate.`;
+          result.mood_text = copy.rebateBoth(activePet.nickname, result.mood_text);
         }
 
         activePet.energy = Math.max(0, activePet.energy - 4);

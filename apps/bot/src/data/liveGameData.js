@@ -70,6 +70,7 @@ const WORK_ACTIVITIES = {
 const PET_SPECIES = {
   pup: {
     name: "Milk Hound",
+    nameVi: "Khuyển Sữa",
     cost: 1200,
     feedBoost: 22,
     playBoost: 20,
@@ -78,6 +79,7 @@ const PET_SPECIES = {
   },
   slime: {
     name: "Mint Slime",
+    nameVi: "Slime Bạc Hà",
     cost: 1500,
     feedBoost: 18,
     playBoost: 26,
@@ -86,6 +88,7 @@ const PET_SPECIES = {
   },
   dragon: {
     name: "Pocket Dragon",
+    nameVi: "Rồng Bỏ Túi",
     cost: 2800,
     feedBoost: 15,
     playBoost: 18,
@@ -94,6 +97,7 @@ const PET_SPECIES = {
   },
   fox: {
     name: "Neon Fox",
+    nameVi: "Cáo Neon",
     cost: 2100,
     feedBoost: 19,
     playBoost: 24,
@@ -102,6 +106,7 @@ const PET_SPECIES = {
   },
   axolotl: {
     name: "Bubble Axolotl",
+    nameVi: "Axolotl Bong Bóng",
     cost: 1850,
     feedBoost: 21,
     playBoost: 21,
@@ -110,6 +115,7 @@ const PET_SPECIES = {
   },
   crow: {
     name: "Vault Crow",
+    nameVi: "Quạ Kho Báu",
     cost: 2400,
     feedBoost: 16,
     playBoost: 22,
@@ -119,9 +125,9 @@ const PET_SPECIES = {
 };
 
 const HOUSE_STYLES = {
-  shack: { label: "Starter Shack", buyCost: 2800, upgradeBase: 1900 },
-  loft: { label: "Neon Loft", buyCost: 7200, upgradeBase: 3600 },
-  manor: { label: "Moon Manor", buyCost: 15000, upgradeBase: 6200 }
+  shack: { label: "Starter Shack", labelVi: "Nhà Tạm Khởi Đầu", buyCost: 2800, upgradeBase: 1900 },
+  loft: { label: "Neon Loft", labelVi: "Căn Gác Neon", buyCost: 7200, upgradeBase: 3600 },
+  manor: { label: "Moon Manor", labelVi: "Dinh Thự Trăng", buyCost: 15000, upgradeBase: 6200 }
 };
 
 const ZONES = Object.fromEntries(
@@ -129,13 +135,15 @@ const ZONES = Object.fromEntries(
     entry.key,
     {
       label: entry.label,
+      labelVi: entry.labelVi,
       unlockLevel: entry.unlockLevel,
       fare: entry.fare,
       danger: entry.danger,
       rewardRange: entry.rewardRange,
       chestChance: entry.chestChance,
       fishCount: entry.fish.length,
-      description: entry.description
+      description: entry.description,
+      descriptionVi: entry.descriptionVi
     }
   ])
 );
@@ -143,23 +151,31 @@ const ZONES = Object.fromEntries(
 const QUIZ_BANK = [
   {
     prompt: "What material is bamboo mainly famous for in this bot?",
+    promptVi: "Trong bot này, tre nổi tiếng nhất vì làm từ gì?",
     answer: "rod",
-    hint: "It smacks fish professionally."
+    hint: "It smacks fish professionally.",
+    hintVi: "Nó chuyên dùng để vụt cá."
   },
   {
     prompt: "What command alias already exists for coinflip?",
+    promptVi: "Alias nào đã có sẵn cho coinflip?",
     answer: "cf",
-    hint: "Two letters, one bad decision."
+    hint: "Two letters, one bad decision.",
+    hintVi: "Hai chữ cái, một quyết định sai lầm."
   },
   {
     prompt: "What biome does Nfish default to?",
+    promptVi: "Biome mặc định của `Nfish` là gì?",
     answer: "reef",
-    hint: "Warm, splashy, beginner-friendly."
+    hint: "Warm, splashy, beginner-friendly.",
+    hintVi: "Ấm áp, bắn nước, thân thiện cho người mới."
   },
   {
     prompt: "What coin does this economy worship?",
+    promptVi: "Nền kinh tế này tôn thờ đồng coin nào?",
     answer: "milk",
-    hint: "Dairy supremacy."
+    hint: "Dairy supremacy.",
+    hintVi: "Quyền lực sữa bò."
   }
 ];
 
@@ -176,19 +192,22 @@ const REDEEM_CODES = {
     coins: 500,
     xp: 80,
     keys: 1,
-    description: "Starter sugar rush."
+    description: "Starter sugar rush.",
+    descriptionVi: "Cú tăng đường mở màn."
   },
   CHAOS2026: {
     coins: 900,
     xp: 150,
     keys: 2,
-    description: "Season opener nonsense."
+    description: "Season opener nonsense.",
+    descriptionVi: "Mớ hỗn loạn khai mùa."
   },
   DEEPSEA: {
     coins: 650,
     xp: 120,
     keys: 1,
-    description: "Ocean tax refund."
+    description: "Ocean tax refund.",
+    descriptionVi: "Tiền hoàn thuế từ đại dương."
   }
 };
 
