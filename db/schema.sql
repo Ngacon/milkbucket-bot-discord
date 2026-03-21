@@ -79,6 +79,35 @@ CREATE TABLE IF NOT EXISTS inventory (
   CONSTRAINT inventory_user_item_unique UNIQUE (user_id, item_id)
 );
 
+CREATE TABLE IF NOT EXISTS maps (
+  id BIGSERIAL PRIMARY KEY,
+  key TEXT NOT NULL UNIQUE,
+  name TEXT NOT NULL,
+  unlock_level INTEGER NOT NULL DEFAULT 1,
+  travel_cost BIGINT NOT NULL DEFAULT 0,
+  description TEXT NOT NULL,
+  metadata JSONB NOT NULL DEFAULT '{}'::JSONB,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS fish (
+  id BIGSERIAL PRIMARY KEY,
+  map_id BIGINT NOT NULL REFERENCES maps(id) ON DELETE CASCADE,
+  key TEXT NOT NULL UNIQUE,
+  name TEXT NOT NULL,
+  rarity TEXT NOT NULL,
+  weight NUMERIC(10,2) NOT NULL DEFAULT 1,
+  base_value BIGINT NOT NULL DEFAULT 0,
+  min_weight_kg NUMERIC(8,2) NOT NULL,
+  max_weight_kg NUMERIC(8,2) NOT NULL,
+  min_length_cm NUMERIC(8,2) NOT NULL,
+  max_length_cm NUMERIC(8,2) NOT NULL,
+  shiny_chance NUMERIC(8,6) NOT NULL DEFAULT 0.0025,
+  metadata JSONB NOT NULL DEFAULT '{}'::JSONB,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 CREATE TABLE IF NOT EXISTS fish_collection (
   id BIGSERIAL PRIMARY KEY,
   user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -95,6 +124,23 @@ CREATE TABLE IF NOT EXISTS fish_collection (
   is_jackpot BOOLEAN NOT NULL DEFAULT FALSE,
   caught_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   metadata JSONB NOT NULL DEFAULT '{}'::JSONB
+);
+
+ALTER TABLE fish_collection
+  ADD COLUMN IF NOT EXISTS is_shiny BOOLEAN NOT NULL DEFAULT FALSE;
+
+CREATE TABLE IF NOT EXISTS user_fish (
+  id BIGSERIAL PRIMARY KEY,
+  user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  fish_id BIGINT NOT NULL REFERENCES fish(id) ON DELETE CASCADE,
+  map_id BIGINT NOT NULL REFERENCES maps(id) ON DELETE CASCADE,
+  is_shiny BOOLEAN NOT NULL DEFAULT FALSE,
+  quantity INTEGER NOT NULL DEFAULT 1,
+  best_weight_kg NUMERIC(8,2) NOT NULL DEFAULT 0,
+  best_length_cm NUMERIC(8,2) NOT NULL DEFAULT 0,
+  total_caught INTEGER NOT NULL DEFAULT 1,
+  last_caught_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  CONSTRAINT user_fish_user_fish_variant_unique UNIQUE (user_id, fish_id, is_shiny)
 );
 
 CREATE TABLE IF NOT EXISTS economy_ledger (
@@ -195,10 +241,17 @@ CREATE INDEX IF NOT EXISTS idx_economy_wallet_desc ON economy (wallet DESC);
 CREATE INDEX IF NOT EXISTS idx_economy_bank_desc ON economy (bank DESC);
 CREATE INDEX IF NOT EXISTS idx_inventory_user_equipped ON inventory (user_id, equipped);
 CREATE INDEX IF NOT EXISTS idx_inventory_item_id ON inventory (item_id);
+CREATE INDEX IF NOT EXISTS idx_maps_key ON maps (key);
+CREATE INDEX IF NOT EXISTS idx_fish_map_id ON fish (map_id);
+CREATE INDEX IF NOT EXISTS idx_fish_key ON fish (key);
 CREATE INDEX IF NOT EXISTS idx_fish_collection_user_sold_caught_at
   ON fish_collection (user_id, sold, caught_at DESC);
 CREATE INDEX IF NOT EXISTS idx_fish_collection_rarity_biome
   ON fish_collection (rarity, biome);
+CREATE INDEX IF NOT EXISTS idx_user_fish_user_map
+  ON user_fish (user_id, map_id);
+CREATE INDEX IF NOT EXISTS idx_user_fish_map_shiny
+  ON user_fish (map_id, is_shiny, total_caught DESC);
 CREATE INDEX IF NOT EXISTS idx_economy_ledger_user_created_at
   ON economy_ledger (user_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_player_states_updated_at
