@@ -1,0 +1,17 @@
+{
+  "name": "botgame-discord-bot",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Chaotic Discord economy bot inspired by OwO and fish bot loops.",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js"
+  },
+  "dependencies": {
+    "discord.js": "^14.19.3",
+    "dotenv": "^16.4.5",
+    "pg": "^8.12.0"
+  }
+}
+
