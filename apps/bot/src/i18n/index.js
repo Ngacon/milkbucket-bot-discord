@@ -17,8 +17,15 @@ const translations = {
       category: "Category",
       aliases: "Aliases",
       cooldown: "Cooldown",
+      syntax: "Syntax",
+      topic: "Topic",
+      subcommands: "Subcommands / Topics",
+      arguments: "Arguments",
       examples: "Examples",
       explanation: "Explanation",
+      relatedCommands: "Related Commands",
+      tips: "Tips",
+      flow: "Suggested Flow",
       noAliases: "None",
       noCooldown: "No cooldown",
       footerList: "{{count}} commands loaded. Endless grind mode enabled.",
@@ -37,6 +44,7 @@ const translations = {
       miniGames: "Mini Games",
       worldRewards: "World And Rewards",
       utility: "Utility",
+      admin: "Admin",
       other: "Other"
     },
     wallet: {
@@ -110,6 +118,61 @@ const translations = {
       invalidConfig:
         "Config keys: `language vi/en`, `notifications on/off`, `compact on/off`, `theme <name>`, `chaos <mode>`.",
       invalidLanguage: "Supported languages: `en`, `vi`."
+    },
+    admin: {
+      notAuthorized: "Only configured bot admins can use this command.",
+      targetRequired: "Mention a user to target with this admin command.",
+      cannotTargetSelf: "You cannot target yourself with this admin command.",
+      cannotTargetAdmin: "You cannot target another configured bot admin.",
+      noReason: "No reason provided.",
+      bannedMessage: "You are banned from using this bot. Reason: {{reason}}",
+      warn: {
+        title: "Warning Issued",
+        summaryTitle: "Warning Record",
+        summaryDescription: "This is the current warning record for **{{user}}**.",
+        description: "Logged a warning for **{{user}}**.\nReason: {{reason}}",
+        fields: {
+          count: "Warnings",
+          latestReason: "Latest Reason",
+          latestAt: "Latest At",
+          history: "Latest 5 Warnings",
+          moderator: "Moderator"
+        }
+      },
+      ban: {
+        title: "User Banned",
+        unbanTitle: "User Unbanned",
+        summaryTitle: "Ban Status",
+        description: "Banned **{{user}}** from using the bot.\nReason: {{reason}}",
+        unbanDescription: "Removed the bot ban from **{{user}}**.\nNote: {{reason}}",
+        summaryDescriptionBanned: "**{{user}}** is currently banned from the bot.",
+        summaryDescriptionClear: "**{{user}}** is not currently banned.",
+        alreadyBanned: "That user is already banned.",
+        notBanned: "That user is not currently banned.",
+        statusBanned: "Banned",
+        statusClear: "Clear",
+        fields: {
+          status: "Status",
+          reason: "Reason",
+          warningCount: "Warnings",
+          log: "Latest 3 Ban Logs",
+          moderator: "Moderator",
+          updatedAt: "Timestamp"
+        }
+      },
+      cleardata: {
+        title: "User Data Cleared",
+        description:
+          "Deleted all bot progression data for **{{user}}**. Their next command will scaffold a fresh profile.",
+        noData: "No bot progression data was found for **{{user}}**.",
+        confirmRequired:
+          "This command is destructive. Re-run it as `{{command}}`.",
+        fields: {
+          discordId: "Discord ID",
+          deleted: "Deleted",
+          moderator: "Moderator"
+        }
+      }
     },
     expansion: {
       invalidNumber: "`{{value}}` is not a valid number. The cashier is judging you.",
@@ -252,8 +315,15 @@ const translations = {
       category: "Nhóm",
       aliases: "Alias",
       cooldown: "Hồi chiêu",
+      syntax: "Cú Pháp",
+      topic: "Topic",
+      subcommands: "Subcommand / Topic",
+      arguments: "Đối Số",
       examples: "Ví Dụ",
       explanation: "Giải Thích",
+      relatedCommands: "Lệnh Liên Kết",
+      tips: "Lưu Ý",
+      flow: "Flow Gợi Ý",
       noAliases: "Không có",
       noCooldown: "Không có",
       footerList: "Đã nạp {{count}} lệnh. Chế độ cày vô tận đang bật.",
@@ -272,6 +342,7 @@ const translations = {
       miniGames: "Mini Game",
       worldRewards: "Thế Giới Và Thưởng",
       utility: "Tiện Ích",
+      admin: "Admin",
       other: "Khác"
     },
     wallet: {
@@ -345,6 +416,61 @@ const translations = {
       invalidConfig:
         "Các khóa cấu hình: `language vi/en`, `notifications on/off`, `compact on/off`, `theme <name>`, `chaos <mode>`.",
       invalidLanguage: "Ngôn ngữ hỗ trợ: `en`, `vi`."
+    },
+    admin: {
+      notAuthorized: "Chỉ bot admin đã cấu hình mới dùng được lệnh này.",
+      targetRequired: "Hãy mention user mà bạn muốn tác động bằng lệnh admin này.",
+      cannotTargetSelf: "Bạn không thể tự nhắm chính mình bằng lệnh admin này.",
+      cannotTargetAdmin: "Bạn không thể tác động lên một bot admin khác.",
+      noReason: "Không có lý do.",
+      bannedMessage: "Bạn đã bị cấm sử dụng bot. Lý do: {{reason}}",
+      warn: {
+        title: "Đã Warning User",
+        summaryTitle: "Hồ Sơ Warning",
+        summaryDescription: "Đây là hồ sơ warning hiện tại của **{{user}}**.",
+        description: "Đã ghi warning cho **{{user}}**.\nLý do: {{reason}}",
+        fields: {
+          count: "Số Warning",
+          latestReason: "Lý Do Gần Nhất",
+          latestAt: "Lần Gần Nhất",
+          history: "5 Warning Gần Nhất",
+          moderator: "Moderator"
+        }
+      },
+      ban: {
+        title: "Đã Ban User",
+        unbanTitle: "Đã Gỡ Ban",
+        summaryTitle: "Trạng Thái Ban",
+        description: "Đã cấm **{{user}}** dùng bot.\nLý do: {{reason}}",
+        unbanDescription: "Đã gỡ ban cho **{{user}}**.\nGhi chú: {{reason}}",
+        summaryDescriptionBanned: "**{{user}}** hiện đang bị cấm dùng bot.",
+        summaryDescriptionClear: "**{{user}}** hiện không bị cấm.",
+        alreadyBanned: "User này đã bị ban rồi.",
+        notBanned: "User này hiện không bị ban.",
+        statusBanned: "Đang Ban",
+        statusClear: "Bình Thường",
+        fields: {
+          status: "Trạng Thái",
+          reason: "Lý Do",
+          warningCount: "Số Warning",
+          log: "3 Log Ban Gần Nhất",
+          moderator: "Moderator",
+          updatedAt: "Thời Gian"
+        }
+      },
+      cleardata: {
+        title: "Đã Xóa Dữ Liệu User",
+        description:
+          "Đã xóa toàn bộ progression bot của **{{user}}**. Lần dùng lệnh tiếp theo sẽ scaffold lại từ đầu.",
+        noData: "Không tìm thấy dữ liệu bot nào của **{{user}}** để xóa.",
+        confirmRequired:
+          "Lệnh này phá dữ liệu. Hãy chạy lại đúng dạng `{{command}}`.",
+        fields: {
+          discordId: "Discord ID",
+          deleted: "Đã Xóa",
+          moderator: "Moderator"
+        }
+      }
     },
     expansion: {
       invalidNumber: "`{{value}}` không phải số hợp lệ. Thu ngân đang nhìn bạn rất phán xét.",

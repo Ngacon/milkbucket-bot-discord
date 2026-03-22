@@ -14,6 +14,13 @@ function readNumber(name, fallback) {
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
+function readIdList(name) {
+  return String(process.env[name] || "")
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean);
+}
+
 function normalizeDatabaseUrl(rawUrl) {
   if (!rawUrl) {
     return rawUrl;
@@ -62,6 +69,7 @@ const rngMode = normalizeRngMode(process.env.RNG_MODE, rngServiceUrl);
 module.exports = {
   discordToken: process.env.DISCORD_TOKEN,
   databaseUrl: normalizeDatabaseUrl(process.env.DATABASE_URL),
+  adminUserIds: new Set(readIdList("BOT_ADMIN_IDS")),
   rngServiceUrl,
   rngMode,
   rngTimeoutMs: readNumber("RNG_TIMEOUT_MS", defaultRngTimeoutMs),

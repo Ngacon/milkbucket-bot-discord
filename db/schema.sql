@@ -166,6 +166,44 @@ CREATE TABLE IF NOT EXISTS world_state (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS bot_moderation (
+  discord_id BIGINT PRIMARY KEY,
+  username TEXT NOT NULL,
+  warning_count INTEGER NOT NULL DEFAULT 0,
+  last_warning_reason TEXT,
+  last_warned_by_discord_id BIGINT,
+  last_warned_by_username TEXT,
+  last_warned_at TIMESTAMPTZ,
+  is_banned BOOLEAN NOT NULL DEFAULT FALSE,
+  ban_reason TEXT,
+  banned_by_discord_id BIGINT,
+  banned_by_username TEXT,
+  banned_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS bot_warning_logs (
+  id BIGSERIAL PRIMARY KEY,
+  discord_id BIGINT NOT NULL,
+  username TEXT NOT NULL,
+  warned_by_discord_id BIGINT NOT NULL,
+  warned_by_username TEXT NOT NULL,
+  reason TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS bot_ban_logs (
+  id BIGSERIAL PRIMARY KEY,
+  discord_id BIGINT NOT NULL,
+  username TEXT NOT NULL,
+  action TEXT NOT NULL,
+  reason TEXT,
+  moderated_by_discord_id BIGINT NOT NULL,
+  moderated_by_username TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 CREATE TABLE IF NOT EXISTS market_listings (
   id BIGSERIAL PRIMARY KEY,
   seller_user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -256,6 +294,12 @@ CREATE INDEX IF NOT EXISTS idx_economy_ledger_user_created_at
   ON economy_ledger (user_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_player_states_updated_at
   ON player_states (updated_at DESC);
+CREATE INDEX IF NOT EXISTS idx_bot_moderation_is_banned
+  ON bot_moderation (is_banned, updated_at DESC);
+CREATE INDEX IF NOT EXISTS idx_bot_warning_logs_discord_id
+  ON bot_warning_logs (discord_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_bot_ban_logs_discord_id
+  ON bot_ban_logs (discord_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_market_listings_active_created_at
   ON market_listings (active, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_market_auctions_status_ends_at

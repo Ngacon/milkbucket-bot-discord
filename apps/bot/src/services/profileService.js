@@ -79,6 +79,22 @@ class ProfileService {
     );
   }
 
+  invalidateUser(discordId, userId) {
+    if (discordId) {
+      this.userCache.delete(String(discordId));
+    }
+
+    if (userId) {
+      this.scaffoldCache.delete(String(userId));
+
+      for (const key of this.membershipCache.keys()) {
+        if (key.endsWith(`:${userId}`)) {
+          this.membershipCache.delete(key);
+        }
+      }
+    }
+  }
+
   async ensureUserRecord(discordUser, executor) {
     if (!executor) {
       const cached = this.getCachedUser(discordUser.id, discordUser.username);

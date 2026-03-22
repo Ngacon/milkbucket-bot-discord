@@ -16,6 +16,7 @@ const { ServerRepository } = require("./repositories/serverRepository");
 const { PlayerStateRepository } = require("./repositories/playerStateRepository");
 const { WorldStateRepository } = require("./repositories/worldStateRepository");
 const { MarketRepository } = require("./repositories/marketRepository");
+const { ModerationRepository } = require("./repositories/moderationRepository");
 const { ProfileService } = require("./services/profileService");
 const { EconomyService } = require("./services/economyService");
 const { FishingService } = require("./services/fishingService");
@@ -62,7 +63,8 @@ const repositories = {
   serverRepository: new ServerRepository(db),
   playerStateRepository: new PlayerStateRepository(db),
   worldStateRepository: new WorldStateRepository(db),
-  marketRepository: new MarketRepository(db)
+  marketRepository: new MarketRepository(db),
+  moderationRepository: new ModerationRepository(db)
 };
 
 const services = {

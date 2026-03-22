@@ -6,6 +6,7 @@ const COMMAND_GROUPS = {
   fishing: new Set(["fish", "deepsea", "net", "aquarium", "release", "mutate"]),
   work: new Set(["mine", "hunt", "farm", "cook", "deliver"]),
   utility: new Set(["help", "config", "settings", "profile"]),
+  admin: new Set(["warn", "ban", "cleardata"]),
   pets: new Set(["pet"]),
   world: new Set(["island", "travel", "map", "zone", "dungeon", "gift", "redeem", "chest"]),
   social: new Set([
@@ -81,6 +82,15 @@ const THEME_PRESETS = {
     imagePalette: ["111827", "4C1D95", "8B5CF6"],
     author: "Milk Bucket // Command Desk",
     footer: "Config, help, and operator controls."
+  },
+  admin: {
+    color: "#DC2626",
+    iconCodepoint: "1f6e1",
+    imageTitle: "Operator Desk",
+    imageSubtitle: "Moderation controls and irreversible buttons.",
+    imagePalette: ["111827", "7F1D1D", "DC2626"],
+    author: "Milk Bucket // Operator Desk",
+    footer: "Moderation controls and irreversible buttons."
   },
   pets: {
     color: "#EC4899",

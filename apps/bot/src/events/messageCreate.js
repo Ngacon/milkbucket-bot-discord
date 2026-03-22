@@ -53,6 +53,14 @@ function formatCommandError(error, t, language) {
   return error?.message || t("system.unknownError");
 }
 
+async function getBanRecord(context, discordId) {
+  if (!context.repositories?.moderationRepository) {
+    return null;
+  }
+
+  return context.repositories.moderationRepository.getRecord(discordId);
+}
+
 module.exports = {
   name: "messageCreate",
   async execute(client, message) {
@@ -72,6 +80,16 @@ module.exports = {
     let t = createTranslator(language, fallbackLanguage);
     const command = context.aliasResolver.resolve(parsed.commandName);
     if (!command) {
+      return;
+    }
+
+    const banRecord = await getBanRecord(context, message.author.id);
+    if (banRecord?.is_banned) {
+      await message.reply(
+        `⛔ ${t("admin.bannedMessage", {
+          reason: banRecord.ban_reason || t("admin.noReason", {}, { fallback: "No reason provided." })
+        })}`
+      );
       return;
     }
 

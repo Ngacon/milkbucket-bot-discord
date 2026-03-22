@@ -87,6 +87,20 @@ class UserRepository {
 
     return rows;
   }
+
+  async deleteByDiscordId(discordId, executor) {
+    const queryable = this.runner(executor);
+    const { rows } = await queryable.query(
+      `
+        DELETE FROM users
+        WHERE discord_id = $1
+        RETURNING *
+      `,
+      [discordId]
+    );
+
+    return rows[0] || null;
+  }
 }
 
 module.exports = { UserRepository };
